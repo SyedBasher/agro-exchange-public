@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "purpose": "Build a clean public source/CI snapshot while keeping real data, credentials and operational evidence private.",
+  "public_include": [
+    ".github/workflows/static-smoke.yml",
+    ".github/workflows/public-release-audit.yml",
+    ".env.example",
+    ".gitignore",
+    "README_PUBLIC.md",
+    "app-core.js",
+    "app.js",
+    "assets/**",
+    "backend/**",
+    "database/**",
+    "diagnostics.html",
+    "docs/ARCHITECTURE.md",
+    "docs/BACKEND_SETUP.md",
+    "docs/PUBLIC_REPOSITORY_POLICY.md",
+    "docs/PUBLIC_RELEASE_MANIFEST.md",
+    "index.html",
+    "manifest.webmanifest",
+    "netlify.toml",
+    "offline.html",
+    "public/**",
+    "public-release-manifest.json",
+    "robots.txt",
+    "scripts/**",
+    "styles.css",
+    "sw.js"
+  ],
+  "public_exclude": [
+    "backend/runtime-config.js",
+    "docs/BUILD_MANUAL.md",
+    "docs/BUILD_MANUAL_V1_8_ADDENDUM.md",
+    "docs/BUILD_MANUAL_V1_8_1_FINALIZATION.md",
+    "docs/BUILD_MANUAL_V1_9_ADDENDUM.md",
+    "docs/CLAUDE_ROUND2_SUPABASE.md",
+    "docs/DEPLOYMENT_CHECKLIST.md",
+    "docs/FIRST_PERSISTENT_FLOW.md",
+    "docs/PILOT_ACCOUNT_BOOTSTRAP.md",
+    "docs/TWILIO_PHONE_AUTH.md",
+    "docs/V1_4_VERIFICATION.md",
+    "docs/V1_5_VERIFICATION.md",
+    "docs/V1_6_VERIFICATION.md",
+    "docs/V1_7_DEVICE_VALIDATION.md",
+    "docs/V1_7_1_REAL_DEVICE.md",
+    "docs/V1_8_REMEDIATION.md",
+    "docs/V1_9_REMEDIATION.md"
+  ],
+  "rename": {
+    "README_PUBLIC.md": "README.md"
+  },
+  "generate": {
+    "backend/runtime-config.js": "sanitize-runtime-config"
+  },
+  "never_publish_path_fragments": [
+    "/data/",
+    "/raw/",
+    "/snapshots/",
+    "/exports/",
+    "/backups/",
+    "/evidence/",
+    "/private/",
+    "/secrets/",
+    "/auth-exports/"
+  ],
+  "notes": [
+    "Database schemas, migrations and simulated seed fixtures are public source code, not live data.",
+    "Operational runbooks, forensic handoffs and internal verification records remain private.",
+    "The public runtime config preserves build identity but replaces live Supabase URL/key with placeholders.",
+    "No open-source license is added by this preparation step."
+  ]
+}

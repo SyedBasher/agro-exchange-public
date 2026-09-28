@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b3324" />
+  <title>Agro-Exchange — Agricultural Markets, Connected</title>
+  <meta name="description" content="Bilingual B2B agricultural market intelligence and trade matching platform for Bangladesh." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="prototype-banner">
+    <div class="shell banner-inner">
+      <span class="status-dot"></span>
+      <span data-i18n="prototype_notice">Pilot environment · all prices and transactions shown are simulated</span>
+      <span class="banner-separator">•</span>
+      <span data-i18n="corridor_notice">Bogra–Dhaka corridor prototype</span>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" role="img"><path d="M20 4C12.5 4 6.3 8.8 4.3 15.5c6.4.5 11.8 3.1 15.7 7.3 3.9-4.2 9.3-6.8 15.7-7.3C33.7 8.8 27.5 4 20 4Z"/><path d="M20 36V22.8M20 22.8c-3.3-4.4-8.1-6.9-14.7-7.2M20 22.8c3.3-4.4 8.1-6.9 14.7-7.2" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="brand-name">Agro-Exchange</div>
+          <div class="brand-sub" data-i18n="brand_sub">Agricultural markets, connected.</div>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <button class="side-link active" data-view="overview"><span class="nav-icon">⌂</span><span data-i18n="nav_overview">Overview</span></button>
+        <button class="side-link" data-view="markets"><span class="nav-icon">↗</span><span data-i18n="nav_markets">Markets</span></button>
+        <button class="side-link" data-view="sell"><span class="nav-icon">＋</span><span data-i18n="nav_sell">Post supply</span></button>
+        <button class="side-link" data-view="demand"><span class="nav-icon">◎</span><span data-i18n="nav_demand">Buyer demand</span></button>
+        <button class="side-link" data-view="matches"><span class="nav-icon">⇄</span><span data-i18n="nav_matches">Matches</span><span class="nav-count">3</span></button>
+        <button class="side-link" data-view="intelligence"><span class="nav-icon">▥</span><span data-i18n="nav_intelligence">Intelligence</span></button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-label" data-i18n="operations">OPERATIONS</div>
+      <nav class="side-nav secondary-nav">
+        <button class="side-link muted-link" data-action="prototype"><span class="nav-icon">▣</span><span data-i18n="nav_trades">Trades</span></button>
+        <button class="side-link muted-link" data-action="prototype"><span class="nav-icon">◇</span><span data-i18n="nav_logistics">Logistics</span></button>
+        <button class="side-link muted-link" data-action="prototype"><span class="nav-icon">✓</span><span data-i18n="nav_quality">Quality & QC</span></button>
+      </nav>
+
+      <div class="sidebar-card">
+        <div class="sidebar-card-label" data-i18n="pilot_label">PILOT MARKET</div>
+        <strong data-i18n="pilot_route">Bogra → Dhaka</strong>
+        <p data-i18n="pilot_desc">Potato, onion and rice market simulation.</p>
+        <div class="pilot-progress"><span style="width:68%"></span></div>
+        <small data-i18n="pilot_stage">Product design · Stage 1</small>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="plain-link" data-action="prototype" data-i18n="help">Help & documentation</button>
+        <span>v0.2 prototype</span>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobileMenu" aria-label="Open menu">☰</button>
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input id="globalSearch" type="search" data-i18n-placeholder="search_placeholder" placeholder="Search commodity, market or buyer" />
+          <span class="search-shortcut">/</span>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" data-action="prototype" aria-label="Notifications">◔<span class="notification-dot"></span></button>
+          <button class="language-switch" id="langToggle" type="button">বাংলা</button>
+          <div class="account-chip">
+            <div class="avatar">AX</div>
+            <div class="account-copy"><strong data-i18n="demo_account">Demo account</strong><span data-i18n="operator_role">Platform operator</span></div>
+            <span class="chevron">⌄</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="market-ticker" aria-label="Market ticker">
+        <div class="ticker-label" data-i18n="market_pulse">MARKET PULSE</div>
+        <div id="tickerItems" class="ticker-items"></div>
+        <div class="ticker-time" data-i18n="simulated_label">SIMULATED</div>
+      </div>
+
+      <main class="content">
+        <section id="overview" class="view active-view">
+          <div class="page-heading">
+            <div><div class="breadcrumb" data-i18n="workspace_label">AGRO-EXCHANGE WORKSPACE</div><h1 data-i18n="overview_title">Market overview</h1><p data-i18n="overview_sub">Price discovery, active demand and trade opportunities across the pilot corridor.</p></div>
+            <div class="heading-actions">
+              <button class="button secondary" data-view-jump="demand"><span>＋</span><span data-i18n="post_demand">Post demand</span></button>
+              <button class="button primary" data-view-jump="sell"><span>＋</span><span data-i18n="post_supply">Post supply</span></button>
+            </div>
+          </div>
+
+          <div class="metrics-grid">
+            <article class="metric-card"><div class="metric-head"><span data-i18n="metric_supply">Listed supply</span><span class="trend-chip up">+8.4%</span></div><div class="metric-value">383 <small>t</small></div><div class="metric-foot"><span data-i18n="metric_supply_note">across 6 active listings</span><span class="sparkline spark-a"></span></div></article>
+            <article class="metric-card"><div class="metric-head"><span data-i18n="metric_demand">Open buyer demand</span><span class="trend-chip up">+12.1%</span></div><div class="metric-value">380 <small>t</small></div><div class="metric-foot"><span data-i18n="metric_demand_note">across 3 verified buyers</span><span class="sparkline spark-b"></span></div></article>
+            <article class="metric-card"><div class="metric-head"><span data-i18n="metric_match">Match rate</span><span class="trend-chip neutral">7d</span></div><div class="metric-value">74<small>%</small></div><div class="metric-foot"><span data-i18n="metric_match_note">eligible orders matched</span><span class="sparkline spark-c"></span></div></article>
+            <article class="metric-card"><div class="metric-head"><span data-i18n="metric_completion">Completion rate</span><span class="trend-chip up">+3.0 pp</span></div><div class="metric-value">89<small>%</small></div><div class="metric-foot"><span data-i18n="metric_completion_note">accepted matches completed</span><span class="sparkline spark-d"></span></div></article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="card market-table-card span-8">
+              <div class="card-head"><div><h2 data-i18n="live_markets">Live market board</h2><p data-i18n="live_markets_sub">Indicative pilot market conditions</p></div><div class="compact-filters"><select id="overviewCommodityFilter" aria-label="Filter commodity"><option value="all" data-i18n-option="all_commodities">All commodities</option><option value="Potato">Potato</option><option value="Onion">Onion</option><option value="Rice">Rice</option></select><button class="text-button" data-view-jump="markets" data-i18n="view_all">View all →</button></div></div>
+              <div class="table-scroll"><table class="data-table"><thead><tr><th data-i18n="th_market">Market</th><th data-i18n="th_last">Last trade</th><th data-i18n="th_change">7d</th><th data-i18n="th_supply">Supply</th><th data-i18n="th_demand">Demand</th><th data-i18n="th_delivered">Dhaka delivered</th><th data-i18n="th_signal">Signal</th></tr></thead><tbody id="overviewMarketTable"></tbody></table></div>
+            </section>
+
+            <aside class="card opportunity-card span-4">
+              <div class="card-head simple"><div><div class="section-kicker" data-i18n="best_opportunity_label">BEST CURRENT OPPORTUNITY</div><h2 data-i18n="best_opportunity">Bogra potato → Dhaka</h2></div><span class="verified-badge">✓ <span data-i18n="modelled">Modelled</span></span></div>
+              <div class="opportunity-spread"><span data-i18n="net_spread">Net spatial spread</span><strong>Tk 4.80<small>/kg</small></strong><div class="spread-positive" data-i18n="after_costs">after indicative fulfilment costs</div></div>
+              <div class="route-economics"><div><span data-i18n="farmgate">Farmgate</span><strong>Tk 29.2</strong></div><span class="route-line"></span><div><span data-i18n="fulfilment">Collection + QC + transport</span><strong>Tk 3.5</strong></div><span class="route-line"></span><div><span data-i18n="buyer_bid">Buyer bid</span><strong>Tk 37.5</strong></div></div>
+              <button class="button primary full" data-view-jump="matches" data-i18n="review_match">Review matching opportunities</button><p class="fine-print" data-i18n="opportunity_note">This is a simulated opportunity, not a live recommendation.</p>
+            </aside>
+
+            <section class="card span-7">
+              <div class="card-head"><div><h2 data-i18n="recent_trades">Recent verified trades</h2><p data-i18n="recent_trades_sub">Transaction trail for the pilot simulation</p></div><span class="status-pill">● <span data-i18n="settled_status">4 settled</span></span></div>
+              <div class="table-scroll"><table class="data-table compact"><thead><tr><th data-i18n="th_trade">Trade</th><th data-i18n="th_route">Route</th><th data-i18n="th_qty">Qty</th><th data-i18n="th_price">Farmgate</th><th data-i18n="th_status">Status</th></tr></thead><tbody id="recentTradesTable"></tbody></table></div>
+            </section>
+
+            <aside class="card span-5 insight-card">
+              <div class="card-head"><div><h2 data-i18n="market_intelligence">Market intelligence</h2><p data-i18n="market_intelligence_sub">Signals derived from pilot data</p></div><button class="icon-button mini" data-view-jump="intelligence">→</button></div>
+              <div class="insight-list">
+                <div class="insight-item"><div class="insight-icon green">↑</div><div><strong data-i18n="tightest_market">Tightest market</strong><p><span data-i18n="onion_bogra">Bogra onion</span> · <b>2.08×</b> <span data-i18n="demand_supply_ratio">demand/supply</span></p></div></div>
+                <div class="insight-item"><div class="insight-icon blue">↘</div><div><strong data-i18n="lowest_delivered">Lowest delivered potato</strong><p><span data-i18n="from_bogra">From Bogra</span> · <b>Tk 32.7/kg</b></p></div></div>
+                <div class="insight-item"><div class="insight-icon amber">◴</div><div><strong data-i18n="fastest_match">Fastest recent match</strong><p><b>48 min</b> · <span data-i18n="potato_bogra_dhaka">Potato, Bogra → Dhaka</span></p></div></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="markets" class="view">
+          <div class="page-heading"><div><div class="breadcrumb" data-i18n="market_intelligence_label">MARKET INTELLIGENCE</div><h1 data-i18n="markets_title">Markets</h1><p data-i18n="markets_sub">Compare source-market prices, supply, demand and indicative delivered costs.</p></div><div class="heading-actions"><button class="button secondary" data-action="prototype" data-i18n="export_data">Export data</button></div></div>
+          <section class="card"><div class="filter-bar"><div class="filter-group"><label data-i18n="commodity">Commodity</label><select id="marketCommodityFilter"><option value="all" data-i18n-option="all_commodities">All commodities</option><option value="Potato">Potato</option><option value="Onion">Onion</option><option value="Rice">Rice</option></select></div><div class="filter-group"><label data-i18n="origin">Origin</label><select id="marketOriginFilter"><option value="all" data-i18n-option="all_origins">All origins</option><option value="Bogra">Bogra</option><option value="Rangpur">Rangpur</option><option value="Joypurhat">Joypurhat</option></select></div><div class="filter-group grow"><label data-i18n="search_market">Search market</label><input id="marketSearch" type="search" data-i18n-placeholder="market_search_placeholder" placeholder="e.g. potato or Bogra" /></div></div><div class="table-scroll large-table"><table class="data-table detailed"><thead><tr><th data-i18n="th_commodity">Commodity</th><th data-i18n="th_origin">Origin</th><th data-i18n="th_last">Last trade</th><th data-i18n="th_change">7d</th><th data-i18n="th_ask">Asking range</th><th data-i18n="th_supply">Supply</th><th data-i18n="th_demand">Demand</th><th data-i18n="th_delivered">Dhaka delivered</th><th data-i18n="th_signal">Signal</th></tr></thead><tbody id="fullMarketTable"></tbody></table></div></section>
+        </section>
+
+        <section id="sell" class="view">
+          <div class="page-heading"><div><div class="breadcrumb" data-i18n="new_listing_label">NEW LISTING</div><h1 data-i18n="sell_title">Post supply</h1><p data-i18n="sell_sub">Create a supply listing and compare it with current buyer demand before publishing.</p></div></div>
+          <div class="form-grid">
+            <form id="sellForm" class="card form-card span-8">
+              <div class="form-section-head"><span class="step-number">1</span><div><h2 data-i18n="produce_details">Produce details</h2><p data-i18n="produce_details_sub">What are you offering to the market?</p></div></div>
+              <div class="fields-grid"><label><span data-i18n="commodity">Commodity</span><select name="commodity"><option>Potato</option><option>Onion</option><option>Rice</option></select></label><label><span data-i18n="grade">Quality / grade</span><select name="grade"><option>Grade A</option><option>Grade B</option><option>Standard</option></select></label><label><span data-i18n="quantity_kg">Quantity (kg)</span><input name="quantity" type="number" min="1" value="1200" /></label><label><span data-i18n="origin">Origin</span><select name="origin"><option>Bogra</option><option>Rangpur</option><option>Joypurhat</option></select></label><label><span data-i18n="minimum_price">Minimum price (Tk/kg)</span><input name="price" type="number" step="0.1" value="29" /></label><label><span data-i18n="available_date">Available date</span><input name="date" type="date" /></label></div>
+              <div class="form-divider"></div><div class="form-section-head"><span class="step-number">2</span><div><h2 data-i18n="listing_preferences">Listing preferences</h2><p data-i18n="listing_preferences_sub">The matching engine will use these constraints.</p></div></div>
+              <div class="choice-row"><label class="choice-card selected"><input type="radio" name="delivery" checked /><div><strong data-i18n="collection_base">Deliver to collection point</strong><span data-i18n="collection_base_sub">Preferred for pilot matching</span></div><span>✓</span></label><label class="choice-card"><input type="radio" name="delivery" /><div><strong data-i18n="farm_pickup">Request farm pickup</strong><span data-i18n="farm_pickup_sub">Subject to route capacity</span></div></label></div>
+              <div class="form-actions"><button type="button" class="button secondary" data-action="prototype" data-i18n="save_draft">Save draft</button><button type="submit" class="button primary" data-i18n="find_buyers">Find compatible buyers</button></div>
+            </form>
+            <aside class="span-4 form-sidebar"><section class="card guidance-card"><div class="section-kicker" data-i18n="market_context">MARKET CONTEXT</div><h2 data-i18n="potato_bogra_title">Potato · Bogra</h2><div class="context-price"><strong>Tk 29.2</strong><span>/kg</span><b>+4.2%</b></div><p data-i18n="last_verified_trade">Last simulated verified trade</p><div class="context-rows"><div><span data-i18n="asking_range">Asking range</span><strong>Tk 28–32</strong></div><div><span data-i18n="buyer_demand_today">Buyer demand</span><strong>61 t</strong></div><div><span data-i18n="dhaka_delivery_cost">Dhaka fulfilment</span><strong>Tk 3.5/kg</strong></div></div></section><section class="card note-card"><strong data-i18n="why_this_matters">Why this matters</strong><p data-i18n="seller_note">A seller should see credible alternatives and delivered economics before accepting an offer, not just a headline market price.</p></section></aside>
+          </div>
+        </section>
+
+        <section id="demand" class="view"><div class="page-heading"><div><div class="breadcrumb" data-i18n="verified_buyers_label">VERIFIED BUYERS</div><h1 data-i18n="demand_title">Buyer demand</h1><p data-i18n="demand_sub">Open procurement requirements from wholesalers, distributors and processors.</p></div><div class="heading-actions"><button class="button primary" data-action="prototype">＋ <span data-i18n="post_demand">Post demand</span></button></div></div><div id="buyerDemandGrid" class="buyer-demand-grid"></div></section>
+
+        <section id="matches" class="view"><div class="page-heading"><div><div class="breadcrumb" data-i18n="matching_engine_label">MATCHING ENGINE</div><h1 data-i18n="matches_title">Ranked opportunities</h1><p data-i18n="matches_sub">Feasible matches ranked by delivered economics, quantity fit, timing and counterparty reliability.</p></div></div><div id="matchList" class="match-stack"></div></section>
+
+        <section id="intelligence" class="view">
+          <div class="page-heading"><div><div class="breadcrumb" data-i18n="decision_support_label">DECISION SUPPORT</div><h1 data-i18n="intelligence_title">Market intelligence</h1><p data-i18n="intelligence_sub">Turn transaction and route data into signals that buyers, sellers and institutions can use.</p></div></div>
+          <div class="intelligence-grid">
+            <section class="card span-7"><div class="card-head"><div><h2 data-i18n="price_dispersion">Regional price dispersion</h2><p data-i18n="potato_reference">Potato · simulated farmgate reference</p></div><span class="status-pill">7d</span></div><div class="horizontal-bars" id="priceBars"></div></section>
+            <section class="card span-5"><div class="card-head"><div><h2 data-i18n="liquidity_quality">Market liquidity</h2><p data-i18n="liquidity_quality_sub">Pilot transaction quality</p></div></div><div class="quality-metrics"><div><span data-i18n="match_rate">Match rate</span><strong>74%</strong><i><b style="width:74%"></b></i></div><div><span data-i18n="completion_rate">Completion rate</span><strong>89%</strong><i><b style="width:89%"></b></i></div><div><span data-i18n="repeat_buyers">Repeat buyers</span><strong>63%</strong><i><b style="width:63%"></b></i></div></div></section>
+            <section class="card span-12"><div class="card-head"><div><h2 data-i18n="corridor_economics">Bogra → Dhaka corridor economics</h2><p data-i18n="corridor_economics_sub">Illustrative delivered-cost decomposition for potato</p></div></div><div class="cost-waterfall"><div><span data-i18n="farmgate">Farmgate</span><strong>Tk 29.2</strong></div><span>＋</span><div><span data-i18n="collection_qc">Collection + QC</span><strong>Tk 0.9</strong></div><span>＋</span><div><span data-i18n="transport">Transport</span><strong>Tk 2.6</strong></div><span>＝</span><div class="highlight-box"><span data-i18n="delivered_cost">Delivered cost</span><strong>Tk 32.7</strong></div><span>→</span><div class="buyer-box"><span data-i18n="buyer_bid">Buyer bid</span><strong>Tk 37.5</strong></div></div></section>
+          </div>
+        </section>
+      </main>
+
+      <footer class="app-footer"><span>© 2026 Agro-Exchange</span><span data-i18n="footer_note">Prototype only · simulated data · no payments or binding contracts</span></footer>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="mobileOverlay" class="mobile-overlay"></div>
+  <script src="app.js"></script>
+</body>
+</html>

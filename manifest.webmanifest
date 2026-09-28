@@ -1,0 +1,31 @@
+{
+  "name": "Agro-Exchange",
+  "short_name": "Agro-Exchange",
+  "description": "Bilingual agricultural market intelligence and trade matching for Bangladesh.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f5ef",
+  "theme_color": "#0b3324",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "assets/agro-exchange-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/agro-exchange-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/agro-exchange-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

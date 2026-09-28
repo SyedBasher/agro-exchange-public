@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+# Controlled Agro-Exchange staging environment. Remove only when a public launch is approved.

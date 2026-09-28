@@ -12,6 +12,8 @@
       bangla:'বাংলা',english:'English',sellQuestion:'What do you want to sell?',
       sellSub:'Tell us what you have. Agro-Exchange will look for compatible verified buyers.',
       chooseProduce:'Choose produce',signInRequired:'Sign in to use the shared Agro-Exchange market.',
+      verificationPendingTitle:'Farmer verification pending',
+      verificationPendingBody:'Your account is signed in. You can review the selling form now; posting supply will be enabled after pilot verification.',
       verificationRequired:'Your farmer account must be verified before you can post supply.',
       buyerApprovalRequired:'An approved buyer account is required to post demand.',
       wrongRole:'This action is not available for your account role.',serviceUnavailable:'The live transaction service is not ready. Please refresh and try again.',
@@ -29,6 +31,8 @@
       bangla:'বাংলা',english:'English',sellQuestion:'আপনি কী বিক্রি করতে চান?',
       sellSub:'আপনার পণ্যের তথ্য দিন। Agro-Exchange উপযুক্ত যাচাইকৃত ক্রেতা খুঁজবে।',
       chooseProduce:'পণ্য বেছে নিন',signInRequired:'শেয়ার্ড Agro-Exchange বাজার ব্যবহার করতে সাইন ইন করুন।',
+      verificationPendingTitle:'কৃষক যাচাই অপেক্ষমাণ',
+      verificationPendingBody:'আপনি সাইন ইন করেছেন। এখন বিক্রির ফর্মটি দেখতে পারবেন; পাইলট যাচাই সম্পন্ন হলে সরবরাহ পোস্ট করা যাবে।',
       verificationRequired:'সরবরাহ পোস্ট করার আগে আপনার কৃষক অ্যাকাউন্ট যাচাই হতে হবে।',
       buyerApprovalRequired:'চাহিদা পোস্ট করতে অনুমোদিত ক্রেতা অ্যাকাউন্ট প্রয়োজন।',
       wrongRole:'আপনার অ্যাকাউন্টের ভূমিকা দিয়ে এই কাজটি করা যাবে না।',serviceUnavailable:'লাইভ লেনদেন সেবা প্রস্তুত নয়। পেজ রিফ্রেশ করে আবার চেষ্টা করুন।',
@@ -175,6 +179,22 @@
     document.querySelectorAll('#axCommodityChooser [data-commodity]').forEach(btn=>{const map={Potato:'potato',Onion:'onion',Rice:'rice'};btn.textContent=t(map[btn.dataset.commodity]);});
   }
 
+  function refreshFarmerVerificationNotice(){
+    const form=document.getElementById('sellForm');if(!form)return;
+    let notice=document.getElementById('axFarmerVerificationNotice');
+    const p=profile();
+    const shouldShow=Boolean(signedIn()&&p?.role==='farmer'&&!p.verified);
+    if(!shouldShow){notice?.remove();return;}
+    if(!notice){
+      notice=document.createElement('div');
+      notice.id='axFarmerVerificationNotice';
+      notice.className='ax-farmer-verification';
+      notice.setAttribute('role','status');
+      form.insertBefore(notice,form.firstChild);
+    }
+    notice.innerHTML=`<strong>${t('verificationPendingTitle')}</strong><span>${t('verificationPendingBody')}</span>`;
+  }
+
   function replaceDeadDemandButton(){
     const original=document.querySelector('#demand .page-heading .heading-actions button[data-action="prototype"]');
     if(!original)return;
@@ -259,11 +279,14 @@
   function applyRoleHome(){
     if(!signedIn())return false;
     const p=profile();if(!p)return false;
-    if(sessionStorage.getItem(ROLE_HOME_KEY)===String(p.id||p.role))return true;
-    if(p.role==='farmer'&&typeof window.showView==='function')window.showView('sell');
-    else if(p.role==='buyer'&&typeof window.showView==='function')window.showView('demand');
-    sessionStorage.setItem(ROLE_HOME_KEY,String(p.id||p.role));
-    return true;
+    const marker=String(p.id||p.role);
+    if(sessionStorage.getItem(ROLE_HOME_KEY)===marker)return true;
+    let routed=false;
+    if(p.role==='farmer'&&typeof window.showView==='function'){window.showView('sell');routed=true;}
+    else if(p.role==='buyer'&&typeof window.showView==='function'){window.showView('demand');routed=true;}
+    if(routed)sessionStorage.setItem(ROLE_HOME_KEY,marker);
+    refreshFarmerVerificationNotice();
+    return routed;
   }
 
   function debounceHighStakesActions(event){
@@ -274,7 +297,7 @@
   }
 
   function refreshLanguageUi(){
-    refreshSelectOptions();refreshAria();refreshFarmerChooser();labelSimulatedWidgets();suppressLegacyTransactionalDemo();addMatchReasons();observeAuthError();
+    refreshSelectOptions();refreshAria();refreshFarmerChooser();refreshFarmerVerificationNotice();labelSimulatedWidgets();suppressLegacyTransactionalDemo();addMatchReasons();observeAuthError();
     const footer=document.querySelector('.sidebar-footer span');if(footer)footer.textContent='v1.8 controlled staging';
   }
 
@@ -292,6 +315,7 @@
     document.addEventListener('click',debounceHighStakesActions,true);
     document.getElementById('langToggle')?.addEventListener('click',()=>setTimeout(()=>{persistLanguage(lang());refreshLanguageUi();},0));
     window.addEventListener('agro-auth-changed',()=>setTimeout(()=>{applySavedLanguage();applyRoleHome();refreshLanguageUi();},350));
+    window.addEventListener('agro-profile-ready',()=>setTimeout(()=>{applySavedLanguage();applyRoleHome();refreshLanguageUi();},0));
 
     let observerPending=false;
     const observer=new MutationObserver(()=>{

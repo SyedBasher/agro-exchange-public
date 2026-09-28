@@ -17,6 +17,7 @@ const buyerReadiness=read('database/buyer_promotion_readiness.sql');
 const operationsReadiness=read('database/operations_role_readiness.sql');
 const lifecycleHardening=read('database/lifecycle_authorization_hardening_v1_10.sql');
 const disputeContinuity=read('database/dispute_party_continuity_v1_10.sql');
+const cancellationIntegrity=read('database/cancellation_inventory_integrity_v1_10.sql');
 
 must(admin.includes('create or replace function public.require_admin_profile()'),'Admin guard helper exists');
 must(admin.includes("if auth.uid() is null then raise exception 'Authentication required'"),'Admin guard requires authenticated identity');
@@ -70,6 +71,13 @@ must(disputeContinuity.includes("Confirmed payments exceed the proposed amount")
 must(disputeContinuity.includes("Resolved dispute has no safe resume state"),'Dispute resolution fails closed on unsafe resume state');
 must(disputeContinuity.includes("p_unit_price_bdt_per_kg<=0"),'Revised commercial unit price must stay strictly positive');
 must(disputeContinuity.includes("from public,anon,authenticated,service_role"),'Internal buyer-party continuity helper is not a browser RPC');
+must(cancellationIntegrity.includes("v_trade.status<>'cancelled'"),'Inventory restoration requires a cancelled trade');
+must(cancellationIntegrity.includes("s.status in ('in_transit','delivered')"),'Inventory restoration blocks dispatched or delivered shipments');
+must(cancellationIntegrity.includes("from public.delivery_receipts"),'Inventory restoration blocks any trade with a delivery receipt');
+must(cancellationIntegrity.includes("status='cancelled'"),'Assigned or accepted shipments are closed when trade cancellation restores inventory');
+must(cancellationIntegrity.includes("inventory_restored_after_cancellation"),'Inventory restoration remains idempotent');
+must(cancellationIntegrity.includes("least("),'Inventory restoration remains quantity-capped');
+must(cancellationIntegrity.includes("from public,anon,authenticated,service_role"),'Inventory restoration helper is internal only');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 authorization contract check FAILED\n');

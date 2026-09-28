@@ -10,6 +10,7 @@ const auth=read('backend/auth.js');
 const css=read('backend/auth.css');
 const runtime=read('backend/runtime-config.js');
 const sw=read('sw.js');
+const jwtHarness=read('scripts/real-jwt-negative-harness.mjs');
 
 must(auth.includes("sendEmailOtp"),'Email passwordless sign-in request exists');
 must(auth.includes("redirect_to=")&&auth.includes("location.origin+location.pathname"),'Magic-link email returns to the active staging origin');
@@ -39,6 +40,11 @@ must(!auth.includes("Configure the Twilio provider in Supabase"),'Provider inter
 must(css.includes('.auth-methods')&&css.includes('88dvh'),'Dual auth UI has mobile-safe styling');
 must(/buildVersion:\s*['\"]1\.10['\"]/.test(runtime),'Runtime identifies v1.10');
 must(sw.includes("CACHE_NAME='agro-exchange-shell-v1.10'"),'PWA cache identifies v1.10');
+must(jwtHarness.includes('AGRO_TEST_ACCESS_TOKEN'),'Real-JWT harness takes its access token only at runtime');
+must(jwtHarness.includes("Farmer verification is required before posting supply"),'Harness tests unverified-farmer supply denial');
+must(jwtHarness.includes("Only verified buyer accounts can post demand"),'Harness tests farmer-to-buyer role separation');
+must(jwtHarness.includes("Only farmer accounts can post supply in this workflow"),'Harness tests buyer-to-farmer role separation');
+must(!jwtHarness.includes('service_role'),'Real-JWT harness does not use service-role credentials');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 auth regression check FAILED\n');

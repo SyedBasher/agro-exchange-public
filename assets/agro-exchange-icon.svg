@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Agro-Exchange">
+  <rect width="512" height="512" rx="112" fill="#0b3324"/>
+  <path d="M256 82c-101 0-184 65-211 155 86 7 159 42 211 98 52-56 125-91 211-98C440 147 357 82 256 82Z" fill="#dce9b7"/>
+  <path d="M256 430V335M256 335c-44-59-109-92-198-96M256 335c44-59 109-92 198-96" fill="none" stroke="#f7f7ef" stroke-width="26" stroke-linecap="round"/>
+</svg>

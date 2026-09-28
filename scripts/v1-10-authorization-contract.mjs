@@ -11,6 +11,7 @@ const adminHardening=read('database/admin_operations_hardening.sql');
 const buyer=read('database/buyer_verification_gate.sql');
 const harness=read('scripts/real-jwt-negative-harness.mjs');
 const readiness=read('database/real_jwt_account_readiness.sql');
+const adminPreflight=read('database/first_admin_eligibility_preflight.sql');
 
 must(admin.includes('create or replace function public.require_admin_profile()'),'Admin guard helper exists');
 must(admin.includes("if auth.uid() is null then raise exception 'Authentication required'"),'Admin guard requires authenticated identity');
@@ -30,6 +31,10 @@ must(!harness.includes('SERVICE_ROLE'),'Real-JWT harness contains no service-rol
 must(readiness.includes('auth_user_id is not null'),'Readiness gate distinguishes Auth-linked profiles from seeded profiles');
 must(readiness.includes('core_farmer_buyer_admin_ready'),'Readiness gate requires independent farmer/buyer/admin coverage');
 must(!/email|phone|token/i.test(readiness.replace(/^--.*$/gm,'')),'Readiness SQL does not expose participant contact or token fields');
+must(adminPreflight.includes('linked_sequence >= 2'),'First-admin preflight excludes the original linked farmer');
+must(adminPreflight.includes('linked_admins = 0'),'First-admin preflight fails closed once an admin exists');
+must(adminPreflight.includes('first_admin_bootstrap_ready'),'First-admin preflight exposes a single readiness decision');
+must(!/email|phone|raw_user_meta_data|access_token|refresh_token/i.test(adminPreflight.replace(/^--.*$/gm,'')),'First-admin preflight exposes no participant contact or auth-secret fields');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 authorization contract check FAILED\n');

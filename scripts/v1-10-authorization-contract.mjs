@@ -16,6 +16,7 @@ const firstAdminBootstrap=read('database/pilot_admin_bootstrap_v1_9.sql');
 const buyerReadiness=read('database/buyer_promotion_readiness.sql');
 const operationsReadiness=read('database/operations_role_readiness.sql');
 const lifecycleHardening=read('database/lifecycle_authorization_hardening_v1_10.sql');
+const disputeContinuity=read('database/dispute_party_continuity_v1_10.sql');
 
 must(admin.includes('create or replace function public.require_admin_profile()'),'Admin guard helper exists');
 must(admin.includes("if auth.uid() is null then raise exception 'Authentication required'"),'Admin guard requires authenticated identity');
@@ -62,6 +63,13 @@ must(lifecycleHardening.includes("v_profile.role='buyer'")&&lifecycleHardening.i
 must(lifecycleHardening.includes("Resolve the active dispute before initiating payment"),'Payment initiation fails closed during active disputes');
 must(lifecycleHardening.includes("Buyer receipt acceptance is required before payment initiation"),'Payment initiation requires accepted buyer receipt');
 must(lifecycleHardening.includes("Trade participant access required"),'Confirmation decline remains participant-scoped');
+must(disputeContinuity.includes("tc.buyer_accepted_by=p_profile_id"),'Dispute continuity recognizes the historically recorded buyer participant');
+must(disputeContinuity.includes("Commercial party acceptance is required; admin cannot substitute for seller or buyer"),'Admin cannot substitute for bilateral commercial acceptance');
+must(disputeContinuity.includes("An initiated payment must be confirmed or marked failed before the adjustment can be finalized"),'Dispute adjustment cannot finalize over an initiated payment');
+must(disputeContinuity.includes("Confirmed payments exceed the proposed amount"),'Dispute adjustment blocks refund/credit ambiguity');
+must(disputeContinuity.includes("Resolved dispute has no safe resume state"),'Dispute resolution fails closed on unsafe resume state');
+must(disputeContinuity.includes("p_unit_price_bdt_per_kg<=0"),'Revised commercial unit price must stay strictly positive');
+must(disputeContinuity.includes("from public,anon,authenticated,service_role"),'Internal buyer-party continuity helper is not a browser RPC');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 authorization contract check FAILED\n');

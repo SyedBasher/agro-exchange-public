@@ -1,4 +1,4 @@
-# Agro-Exchange architecture v1.8.1
+# Agro-Exchange architecture v1.10 controlled-pilot release candidate
 
 ## 1. Product boundary
 
@@ -83,7 +83,7 @@ The browser contains only the Supabase project URL and publishable key. Service-
 
 New self-service Auth users are provisioned as **unverified farmers**. Buyer and operational roles are approval-based. Buyers also need membership in a verified buyer organization.
 
-### v1.8 security boundary
+### v1.10 security boundary
 
 The browser no longer has direct authenticated `INSERT/UPDATE/DELETE` privileges on:
 
@@ -268,7 +268,7 @@ The platform distinguishes:
 - verified platform transactions;
 - modelled/indicative assumptions.
 
-v1.8 adds per-widget SIMULATED labels to the static overview KPIs/opportunity and corrects matching/fulfilment copy so illustrative component examples are not confused with the live matching cost model.
+The controlled pilot adds per-widget SIMULATED labels to the static overview KPIs/opportunity and corrects matching/fulfilment copy so illustrative component examples are not confused with the live matching cost model.
 
 Legacy demo transaction seeding is removed from the production bootstrap. Operational transaction actions require authentication/profile context in Supabase mode; device-local demonstration data are not actionable as real transactions.
 
@@ -288,7 +288,7 @@ The static shell can reopen after a successful online visit. Live account/transa
 
 Supabase Auth, REST and Storage requests are excluded from service-worker caching.
 
-v1.8.1 adds:
+The current controlled-pilot build adds:
 
 - a cache namespace tied to build `1.8.1`;
 - a no-cache runtime build check that warns an installed stale client to reload;
@@ -299,7 +299,7 @@ v1.8.1 adds:
 
 ## 15. Automated and live verification boundary
 
-CI now checks static deployment integrity, JavaScript syntax and v1.8 forensic regression invariants covering the known Round-1 security/trust defects.
+CI now checks static deployment integrity, JavaScript syntax, v1.8/v1.9 regression invariants, v1.10 Auth regression gates and the v1.10 authorization/commercial-integrity contract.
 
 Live Supabase checks have additionally confirmed the new direct-write privilege posture, caller-helper EXECUTE privileges, matching candidates and active-shipment unique index.
 
@@ -325,14 +325,14 @@ live grants/RLS/functions/indexes/advisors
 
 Use `docs/CLAUDE_ROUND2_SUPABASE.md` and `database/forensic_readonly_checks_v1_8.sql`. Do not paste service-role keys, database passwords or private provider secrets into prompts or repository files.
 
-## 18. Remaining launch gate
+## 18. Remaining pilot launch gate
 
 Before a real-user pilot:
 
-1. finish PR/CI review and merge v1.8.1 only if clean;
+1. finish PR #3 release-candidate review and merge only if clean;
 2. deploy the exact merged build to controlled HTTPS staging;
-3. enable a legitimate authentication route and provision separate test roles;
-4. run adversarial authorization checks with real JWTs;
+3. provision independent real Auth-linked farmer, admin and buyer identities, followed by QC operator, field agent and transporter;
+4. run the real-JWT positive/negative role matrix;
 5. run the full multi-account/multi-device transaction chain;
-6. repeat the forensic review with live Supabase access;
-7. resolve any new material findings before the very small controlled pilot.
+6. run the zero-anomaly trade-state health audit and repeat the live Supabase forensic review;
+7. resolve any material finding before the very small controlled pilot.

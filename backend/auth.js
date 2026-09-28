@@ -181,6 +181,14 @@
         headers:{Authorization:'Bearer '+token}
       });
       currentProfile=Array.isArray(rows)?rows[0]||null:null;
+      window.dispatchEvent(new CustomEvent('agro-profile-ready',{detail:{
+        profile:currentProfile?{
+          id:currentProfile.id,
+          role:currentProfile.role,
+          verified:Boolean(currentProfile.verified),
+          preferred_language:currentProfile.preferred_language||null
+        }:null
+      }}));
       return currentProfile;
     }catch{return null;}
   }

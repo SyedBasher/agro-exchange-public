@@ -23,6 +23,11 @@ must(auth.includes("SMS sign-in is temporarily unavailable. Use Email for pilot 
 must(auth.includes("authUsePhone")&&auth.includes("authUseEmail"),'Bilingual sign-in method switch exists');
 must(auth.includes("authEmailSent")&&auth.includes("No code is required with the current staging email template."),'Email staging flow explains magic-link sign-in instead of falsely requiring a code');
 must(auth.includes("agroV18RoleHomeApplied"),'Fresh auth sessions reset the role-home routing latch');
+must(auth.includes("agro-profile-ready"),'Profile readiness is signaled after authenticated profile load');
+const hardening=read('backend/v1-8-hardening.js');
+must(hardening.includes("window.addEventListener('agro-profile-ready'"),'Role-home routing waits for the authenticated profile');
+must(hardening.includes("p.role==='farmer'")&&hardening.includes("window.showView('sell')"),'Farmer role-home routes to the selling workflow');
+must(hardening.includes('verificationPendingTitle')&&hardening.includes('verificationPendingBody'),'Unverified farmers receive bilingual verification-pending guidance');
 must(!auth.includes("Configure the Twilio provider in Supabase"),'Provider internals are not exposed to end users');
 must(css.includes('.auth-methods')&&css.includes('88dvh'),'Dual auth UI has mobile-safe styling');
 must(/buildVersion:\s*['\"]1\.10['\"]/.test(runtime),'Runtime identifies v1.10');

@@ -15,6 +15,7 @@ const adminPreflight=read('database/first_admin_eligibility_preflight.sql');
 const firstAdminBootstrap=read('database/pilot_admin_bootstrap_v1_9.sql');
 const buyerReadiness=read('database/buyer_promotion_readiness.sql');
 const operationsReadiness=read('database/operations_role_readiness.sql');
+const lifecycleHardening=read('database/lifecycle_authorization_hardening_v1_10.sql');
 
 must(admin.includes('create or replace function public.require_admin_profile()'),'Admin guard helper exists');
 must(admin.includes("if auth.uid() is null then raise exception 'Authentication required'"),'Admin guard requires authenticated identity');
@@ -57,6 +58,10 @@ must(harness.includes("get_qc_queue"),'QC JWT harness includes assigned-queue po
 must(harness.includes("get_qc_assignment_queue"),'Field-agent JWT harness includes QC assignment queue check');
 must(harness.includes("get_available_transporters"),'Field-agent JWT harness includes transporter lookup check');
 must(harness.includes("get_my_shipments"),'Transporter JWT harness includes scoped shipment positive check');
+must(lifecycleHardening.includes("v_profile.role='buyer'")&&lifecycleHardening.includes("org.verified=true"),'Lifecycle hardening requires current verified buyer and organization');
+must(lifecycleHardening.includes("Resolve the active dispute before initiating payment"),'Payment initiation fails closed during active disputes');
+must(lifecycleHardening.includes("Buyer receipt acceptance is required before payment initiation"),'Payment initiation requires accepted buyer receipt');
+must(lifecycleHardening.includes("Trade participant access required"),'Confirmation decline remains participant-scoped');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 authorization contract check FAILED\n');

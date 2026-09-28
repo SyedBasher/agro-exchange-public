@@ -16,6 +16,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Generate deploy-time runtime config with CI-safe dummy values
+        env:
+          AGRO_SUPABASE_URL: https://public-ci.supabase.co
+          AGRO_SUPABASE_PUBLISHABLE_KEY: sb_publishable_public_ci_only
+          AGRO_APP_ENVIRONMENT: staging
+          AGRO_BUILD_VERSION: "1.10"
+        run: node scripts/generate-runtime-config.mjs
       - name: Validate deployment files
         run: node scripts/static-smoke.mjs
       - name: Run v1.8 forensic regression gates
@@ -32,6 +39,7 @@ jobs:
           node --check app-core.js
           find backend -maxdepth 1 -name '*.js' -print0 | xargs -0 -n1 node --check
           node --check scripts/static-smoke.mjs
+          node --check scripts/generate-runtime-config.mjs
           node --check scripts/v1-8-regression.mjs
           node --check scripts/v1-9-regression.mjs
           node --check scripts/v1-10-auth-regression.mjs

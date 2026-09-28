@@ -12,6 +12,7 @@ const buyer=read('database/buyer_verification_gate.sql');
 const harness=read('scripts/real-jwt-negative-harness.mjs');
 const readiness=read('database/real_jwt_account_readiness.sql');
 const adminPreflight=read('database/first_admin_eligibility_preflight.sql');
+const firstAdminBootstrap=read('database/pilot_admin_bootstrap_v1_9.sql');
 
 must(admin.includes('create or replace function public.require_admin_profile()'),'Admin guard helper exists');
 must(admin.includes("if auth.uid() is null then raise exception 'Authentication required'"),'Admin guard requires authenticated identity');
@@ -35,6 +36,11 @@ must(adminPreflight.includes('linked_sequence >= 2'),'First-admin preflight excl
 must(adminPreflight.includes('linked_admins = 0'),'First-admin preflight fails closed once an admin exists');
 must(adminPreflight.includes('first_admin_bootstrap_ready'),'First-admin preflight exposes a single readiness decision');
 must(!/email|phone|raw_user_meta_data|access_token|refresh_token/i.test(adminPreflight.replace(/^--.*$/gm,'')),'First-admin preflight exposes no participant contact or auth-secret fields');
+must(firstAdminBootstrap.includes("v_auth_users < 2 or v_linked_profiles < 2"),'Bootstrap itself requires a separate second Auth-linked account');
+must(firstAdminBootstrap.includes("v_profile.id=v_original_profile_id"),'Bootstrap itself rejects the original linked farmer');
+must(firstAdminBootstrap.includes("v_profile.role<>'farmer' or coalesce(v_profile.verified,false)"),'Bootstrap accepts only a newly linked unverified farmer candidate');
+must(firstAdminBootstrap.includes("pg_advisory_xact_lock"),'Bootstrap serializes the one-time admin decision');
+must(firstAdminBootstrap.includes("from public,anon,authenticated,service_role"),'Bootstrap remains unavailable to browser and service roles');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 authorization contract check FAILED\n');

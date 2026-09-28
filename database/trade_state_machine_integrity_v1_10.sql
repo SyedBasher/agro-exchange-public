@@ -23,11 +23,11 @@ begin
 
   v_allowed:=case
     when old.status='confirmed'
-      and new.status in ('awaiting_qc','ready_for_dispatch','disputed','cancelled') then true
+      and new.status in ('awaiting_qc','ready_for_dispatch','disputed') then true
     when old.status='awaiting_qc'
-      and new.status in ('ready_for_dispatch','disputed','cancelled') then true
+      and new.status in ('ready_for_dispatch','disputed') then true
     when old.status='ready_for_dispatch'
-      and new.status in ('in_transit','disputed','cancelled') then true
+      and new.status in ('in_transit','disputed') then true
     when old.status='in_transit'
       and new.status in ('ready_for_dispatch','delivered','disputed') then true
     when old.status='delivered'

@@ -21,16 +21,17 @@
   function accessToken(){return cfg.accessToken||sessionStorage.getItem(ACCESS_KEY)||'';}
   function refreshToken(){return sessionStorage.getItem(REFRESH_KEY)||'';}
 
-  function setSession(data){
+  function setSession(data,{freshAuth=false}={}){
     if(!data||!data.access_token)return;
     cfg.accessToken=data.access_token;
     sessionStorage.setItem(ACCESS_KEY,data.access_token);
     if(data.refresh_token)sessionStorage.setItem(REFRESH_KEY,data.refresh_token);
     const expiresAt=data.expires_at?Number(data.expires_at)*1000:Date.now()+(Number(data.expires_in||3600)*1000);
     sessionStorage.setItem(EXPIRY_KEY,String(expiresAt));
-    // A fresh Auth session should receive role-aware home routing once.
-    sessionStorage.removeItem('agroV18RoleHomeApplied');
-    window.dispatchEvent(new CustomEvent('agro-auth-changed',{detail:{signedIn:true}}));
+    // Only a genuinely fresh sign-in should re-arm role-aware home routing.
+    // Silent access-token refreshes must preserve the user's current navigation.
+    if(freshAuth)sessionStorage.removeItem('agroV18RoleHomeApplied');
+    window.dispatchEvent(new CustomEvent('agro-auth-changed',{detail:{signedIn:true,freshAuth}}));
   }
 
   function clearSession(){
@@ -105,7 +106,7 @@
       ?{type:'email',email:pendingAuth.value,token}
       :{type:'sms',phone:pendingAuth.value,token};
     const data=await request('/auth/v1/verify',{method:'POST',body:JSON.stringify(body)});
-    setSession(data);
+    setSession(data,{freshAuth:true});
     currentUser=data?.user||null;
     await loadProfile();
     updateAccountUi();
@@ -122,7 +123,7 @@
       refresh_token:params.get('refresh_token')||'',
       expires_in:Number(params.get('expires_in')||3600),
       token_type:params.get('token_type')||'bearer'
-    });
+    },{freshAuth:true});
     history.replaceState(null,'',location.pathname+location.search);
     await loadUser();
     if(currentUser)await loadProfile();
@@ -138,7 +139,7 @@
       const data=await request('/auth/v1/token?grant_type=refresh_token',{
         method:'POST',body:JSON.stringify({refresh_token:token})
       });
-      setSession(data);
+      setSession(data,{freshAuth:false});
       currentUser=data?.user||currentUser;
       return data;
     }catch(err){

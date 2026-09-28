@@ -8,6 +8,8 @@ const setup=read('docs/BACKEND_SETUP.md');
 const architecture=read('docs/ARCHITECTURE.md');
 const app=read('app.js');
 const hardening=read('backend/v1-8-hardening.js');
+const identityStage=read('database/pilot_identity_stage.sql');
+const identityOnboarding=read('docs/V1_10_IDENTITY_ONBOARDING.md');
 
 const ordered=[
   'database/lifecycle_authorization_hardening_v1_10.sql',
@@ -51,6 +53,12 @@ const stateMachine=read('database/trade_state_machine_integrity_v1_10.sql');
 must(stateMachine.includes('trade_status_transition_guard_v1_10'),'Central state-machine trigger is part of release source');
 const health=read('database/trade_state_machine_health.sql');
 must(health.includes('settled_payment_total_mismatch'),'Release source includes state-machine health diagnostics');
+must(identityStage.includes('WAITING_FOR_SECOND_AUTH_IDENTITY'),'Identity-stage diagnostic recognizes the one-user starting state');
+must(identityStage.includes('FIRST_ADMIN_CANDIDATE_READY'),'Identity-stage diagnostic recognizes first-admin readiness');
+must(identityStage.includes('FULL_ROLE_MATRIX_READY'),'Identity-stage diagnostic recognizes full role readiness');
+must(!/email|phone|token|magic[_ -]?link/i.test(identityStage.replace(/^--.*$/gm,'')),'Identity-stage SQL does not expose participant contact/auth secrets');
+must(identityOnboarding.includes('v1.9 staging frontend'),'Identity onboarding documents the v1.9 identity-only boundary');
+must(identityOnboarding.includes('must wait until the **v1.10 release-candidate frontend** is deployed'),'Identity onboarding blocks transaction testing on the old frontend');
 
 if(process.exitCode)process.exit(process.exitCode);
 console.log('v1.10 release-candidate repository gates passed');

@@ -79,3 +79,22 @@ Do not execute `bootstrap_first_admin(uuid)` until:
 4. the account owner has explicitly confirmed the promotion.
 
 The first-admin operation is not part of automated public CI.
+
+
+## Staged account-provisioning sequence
+
+The current staging database must not treat seeded/unlinked profiles as real-JWT test identities.
+
+Use this order:
+
+1. Keep the existing real farmer account unchanged.
+2. A second authorized participant signs in through the normal staging Auth flow, creating a second Auth-linked farmer profile.
+3. Only after that second linked account is visible, designate it as the first admin if that participant is intended to operate the pilot. Do not bootstrap the original farmer account.
+4. A third authorized participant signs in through the normal staging Auth flow.
+5. The new admin promotes that third linked profile to buyer and attaches it to a verified buyer organization through the normal admin workflow.
+6. Execute farmer↔buyer positive and negative real-JWT tests.
+7. Add separate controlled participants for QC operator, field agent, and transporter, then run assignment-scoped positive/negative tests.
+
+Before any promotion, run `database/real_jwt_account_readiness.sql`. Seeded profiles with no `auth_user_id` do not satisfy a JWT-readiness gate.
+
+No test identity should be fabricated. No shared password, magic-link URL, access token, refresh token, personal email address, or phone number belongs in this repository.

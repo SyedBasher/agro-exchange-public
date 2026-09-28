@@ -85,7 +85,7 @@ must(hardening.includes('localizeServerMessage'),'F-08 server errors pass throug
 must(finalHardening.includes("'Primary navigation','প্রধান নেভিগেশন'")&&finalHardening.includes("'Notifications','নোটিফিকেশন'"),'Accessibility labels localize with the selected language');
 
 // Mobile/PWA/backend truthfulness.
-const runtimeVersion=runtime.match(/buildVersion:\s*'([^']+)'/)?.[1];
+const runtimeVersion=runtime.match(/buildVersion:\s*['\"]([^'\"]+)['\"]/)?.[1];
 const cacheVersion=sw.match(/CACHE_NAME='agro-exchange-shell-v([^']+)'/)?.[1];
 must(versionAtLeast(runtimeVersion,'1.8.1'),'Runtime retains the v1.8.1-or-later hardened build identity');
 must(versionAtLeast(cacheVersion,'1.8.1'),'F-31 PWA cache namespace remains at v1.8.1 or later');

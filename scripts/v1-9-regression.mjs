@@ -65,7 +65,7 @@ must(!auth.includes('Configure the Twilio provider in Supabase'),'Auth UI does n
 must(auth.includes('rebuildModalForLanguage'),'Auth modal can rebuild after language changes');
 
 // PWA/stale-build safety.
-const runtimeVersion=runtime.match(/buildVersion:\s*'([^']+)'/)?.[1];
+const runtimeVersion=runtime.match(/buildVersion:\s*['\"]([^'\"]+)['\"]/)?.[1];
 const cacheVersion=sw.match(/CACHE_NAME='agro-exchange-shell-v([^']+)'/)?.[1];
 must(versionAtLeast(runtimeVersion,'1.9'),'Runtime remains v1.9 or later');
 must(versionAtLeast(cacheVersion,'1.9'),'Service-worker cache remains v1.9 or later');

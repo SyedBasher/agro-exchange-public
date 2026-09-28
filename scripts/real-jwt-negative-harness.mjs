@@ -126,8 +126,37 @@ if(profile.role==='farmer'&&!profile.verified){
     p_available_from:future,
     p_fulfilment_preference:'collection_base'
   },'Only farmer accounts can post supply in this workflow');
+}else if(profile.role==='qc_operator'){
+  if(!profile.verified)fail('QC operator must be verified before JWT readiness can pass');
+  const qcQueue=await request('/rest/v1/rpc/get_qc_queue',{method:'POST',body:'{}'});
+  if(!qcQueue.response.ok)fail('QC queue read failed: '+errorText(qcQueue));
+  pass('verified QC operator can access only its QC queue');
+  await expectRpcDenied('post_buy_order',{
+    p_commodity_code:'POTATO',p_grade_code:null,p_destination_district:'Dhaka',
+    p_quantity_kg:1,p_target_price:1,p_delivery_from:future,p_delivery_until:future
+  },'Only verified buyer accounts can post demand');
+}else if(profile.role==='field_agent'){
+  if(!profile.verified)fail('field agent must be verified before JWT readiness can pass');
+  const qcAssignments=await request('/rest/v1/rpc/get_qc_assignment_queue',{method:'POST',body:'{}'});
+  if(!qcAssignments.response.ok)fail('field-agent QC assignment queue failed: '+errorText(qcAssignments));
+  const transporters=await request('/rest/v1/rpc/get_available_transporters',{method:'POST',body:'{}'});
+  if(!transporters.response.ok)fail('field-agent transporter lookup failed: '+errorText(transporters));
+  pass('verified field agent can access operational assignment queues');
+  await expectRpcDenied('post_buy_order',{
+    p_commodity_code:'POTATO',p_grade_code:null,p_destination_district:'Dhaka',
+    p_quantity_kg:1,p_target_price:1,p_delivery_from:future,p_delivery_until:future
+  },'Only verified buyer accounts can post demand');
+}else if(profile.role==='transporter'){
+  if(!profile.verified)fail('transporter must be verified before JWT readiness can pass');
+  const shipments=await request('/rest/v1/rpc/get_my_shipments',{method:'POST',body:'{}'});
+  if(!shipments.response.ok)fail('transporter shipment read failed: '+errorText(shipments));
+  pass('verified transporter can access scoped shipment view');
+  await expectRpcDenied('post_buy_order',{
+    p_commodity_code:'POTATO',p_grade_code:null,p_destination_district:'Dhaka',
+    p_quantity_kg:1,p_target_price:1,p_delivery_from:future,p_delivery_until:future
+  },'Only verified buyer accounts can post demand');
 }else{
-  console.log('INFO: identity/RLS preflight passed. No mutation-free negative RPC is yet defined for role '+profile.role+'.');
+  console.log('INFO: identity/RLS preflight passed for role '+profile.role+'.');
 }
 
 console.log('Real-JWT negative authorization harness PASSED');

@@ -19,6 +19,7 @@ const lifecycleHardening=read('database/lifecycle_authorization_hardening_v1_10.
 const disputeContinuity=read('database/dispute_party_continuity_v1_10.sql');
 const cancellationIntegrity=read('database/cancellation_inventory_integrity_v1_10.sql');
 const quantityIntegrity=read('database/quantity_reconciliation_integrity_v1_10.sql');
+const monetaryIntegrity=read('database/monetary_reconciliation_integrity_v1_10.sql');
 
 must(admin.includes('create or replace function public.require_admin_profile()'),'Admin guard helper exists');
 must(admin.includes("if auth.uid() is null then raise exception 'Authentication required'"),'Admin guard requires authenticated identity');
@@ -84,6 +85,13 @@ must(quantityIntegrity.includes("Payment trade does not match its payment obliga
 must(quantityIntegrity.includes("Delivery receipt trade does not match its shipment"),'Delivery receipt must match shipment trade');
 must(quantityIntegrity.includes("Delivery receipt buyer organization does not match the trade"),'Delivery receipt must match trade buyer organization');
 must(quantityIntegrity.match(/from public,anon,authenticated,service_role/g)?.length>=3,'Quantity integrity trigger helpers remain internal only');
+must(monetaryIntegrity.includes("payments_non_cash_reference_per_trade_v1_10"),'Non-cash payment references are unique per trade and method');
+must(monetaryIntegrity.includes("Payment obligation amount must equal quantity multiplied by unit price"),'Payment obligation amount reconciles exactly to quantity times unit price');
+must(monetaryIntegrity.includes("Payment amount exceeds remaining amount due"),'Payment initiation blocks overpayment at stored precision');
+must(monetaryIntegrity.includes("Confirmed payment total would exceed the amount due"),'Seller confirmation cannot over-settle an obligation');
+must(monetaryIntegrity.includes("if v_total=v_obligation.amount_due_bdt then"),'Settlement requires exact 2-decimal equality');
+must(monetaryIntegrity.includes("payments_amount_bdt_positive_v1_10"),'Recorded payments must be strictly positive');
+must(monetaryIntegrity.includes("payment_obligations_unit_price_positive_v1_10"),'Active obligation unit price remains strictly positive');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 authorization contract check FAILED\n');

@@ -333,7 +333,7 @@
 
   function refreshLanguageUi(){
     refreshSelectOptions();refreshAria();refreshFarmerChooser();refreshFarmerVerificationNotice();refreshRoleNavigation();labelSimulatedWidgets();suppressLegacyTransactionalDemo();addMatchReasons();observeAuthError();
-    const footer=document.querySelector('.sidebar-footer span');if(footer)footer.textContent='v1.8 controlled staging';
+    const footer=document.querySelector('.sidebar-footer span');if(footer)footer.textContent='v1.10 controlled staging';
   }
 
   function reportModuleFailure(src,error){

@@ -1,0 +1,8 @@
+{
+  "generated_at": "2026-09-28",
+  "source_release": "Agro-Exchange v1.10 public snapshot",
+  "source_repository_history": "not transferred",
+  "source_branch": "public-release-candidate-v1.10",
+  "policy_version": 1,
+  "note": "Clean public source snapshot. Live data, credentials, Auth/session exports, evidence and internal operational records are excluded."
+}

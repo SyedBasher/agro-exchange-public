@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b3324">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Agro-Exchange Device Diagnostics</title>
+  <style>
+    :root{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#163127;background:#f4f5ef}
+    *{box-sizing:border-box}body{margin:0}.wrap{max-width:840px;margin:auto;padding:24px 18px 48px}.top{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}.brand{font-weight:800;color:#0b3324}.pill{border:1px solid #b9c9c0;border-radius:999px;padding:6px 10px;font-size:12px;background:#fff}h1{font-size:clamp(26px,5vw,40px);margin:28px 0 8px}p{line-height:1.55;color:#52645c}.card{background:#fff;border:1px solid #dce4df;border-radius:16px;padding:16px;margin:14px 0;box-shadow:0 4px 18px rgba(11,51,36,.05)}.row{display:grid;grid-template-columns:minmax(150px,1fr) 2fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #edf1ee}.row:last-child{border-bottom:0}.label{font-weight:700}.detail{font-size:14px;color:#61736a;word-break:break-word}.status{font-size:12px;font-weight:800;border-radius:999px;padding:5px 9px}.pass{background:#e8f5ee;color:#145b35}.warn{background:#fff4dd;color:#7b5100}.fail{background:#fde8e7;color:#8b2720}button{border:0;border-radius:10px;padding:11px 14px;font-weight:750;cursor:pointer}.primary{background:#0b3324;color:white}.secondary{background:#e8eeea;color:#173a2c}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.small{font-size:12px;color:#697970}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}@media(max-width:620px){.row{grid-template-columns:1fr auto}.detail{grid-column:1/-1}.wrap{padding:18px 14px 40px}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top"><div class="brand">Agro-Exchange</div><div class="pill" id="buildPill">Device validation</div></div>
+    <h1 id="title">Device diagnostics</h1>
+    <p id="intro">Use this page on each physical pilot device before testing a real transaction. It checks the browser, PWA shell and public Supabase reachability without exposing account tokens.</p>
+    <div class="actions">
+      <button class="primary" id="run">Run checks</button>
+      <button class="secondary" id="lang">বাংলা</button>
+      <button class="secondary" id="copy">Copy results</button>
+    </div>
+    <section class="card" id="results" aria-live="polite"></section>
+    <p class="small">A passing diagnostics page does not prove authentication, role permissions, camera upload or end-to-end settlement. Those still require the controlled multi-device test matrix.</p>
+  </main>
+  <script src="backend/runtime-config.js"></script>
+  <script>
+  (function(){
+    'use strict';
+    let bn=false;let latest=[];
+    const $=s=>document.querySelector(s);
+    const cfg=window.AGRO_EXCHANGE_CONFIG||{};
+    const t=(en,bnText)=>bn?bnText:en;
+    function status(ok,warn=false){return ok?['PASS','pass']:warn?['CHECK','warn']:['FAIL','fail'];}
+    function add(label,detail,ok,warn=false){const s=status(ok,warn);latest.push({label,detail,status:s[0]});return `<div class="row"><div class="label">${label}</div><div class="detail">${detail}</div><span class="status ${s[1]}">${s[0]}</span></div>`;}
+    async function run(){
+      latest=[];let html='';
+      const secure=window.isSecureContext||location.hostname==='localhost'||location.hostname==='127.0.0.1';
+      html+=add(t('Secure context','নিরাপদ সংযোগ'),location.protocol+'//'+location.host,secure);
+      html+=add(t('Online state','অনলাইন অবস্থা'),navigator.onLine?t('Browser reports online','ব্রাউজার অনলাইন দেখাচ্ছে'):t('Browser reports offline','ব্রাউজার অফলাইন দেখাচ্ছে'),navigator.onLine,!navigator.onLine);
+      html+=add(t('Viewport','স্ক্রিন ভিউপোর্ট'),`${innerWidth} × ${innerHeight}px · DPR ${window.devicePixelRatio||1}`,innerWidth>=320);
+      const touch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
+      html+=add(t('Touch input','টাচ ইনপুট'),touch?t('Touch-capable device','টাচ সমর্থিত ডিভাইস'):t('No touch capability detected','টাচ শনাক্ত হয়নি'),touch,true);
+      const camera=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
+      html+=add(t('Camera API','ক্যামেরা API'),camera?t('Camera API available','ক্যামেরা API আছে'):t('Camera API unavailable','ক্যামেরা API নেই'),camera,true);
+      const swSupport='serviceWorker' in navigator;
+      let swDetail=swSupport?t('Supported; checking registration…','সমর্থিত; রেজিস্ট্রেশন পরীক্ষা হচ্ছে…'):t('Not supported','সমর্থিত নয়');
+      let swOk=false;
+      if(swSupport){try{const reg=await navigator.serviceWorker.getRegistration();swOk=!!reg;swDetail=reg?t('Registered','রেজিস্টার্ড'):t('Not registered yet — reload once online','এখনও রেজিস্টার্ড নয় — অনলাইনে একবার রিলোড করুন');}catch(e){swDetail=e.message;}}
+      html+=add(t('Service worker','সার্ভিস ওয়ার্কার'),swDetail,swOk,swSupport&&!swOk);
+      let manifestOk=false,manifestDetail='';
+      try{const r=await fetch('manifest.webmanifest',{cache:'no-store'});manifestOk=r.ok;manifestDetail=`HTTP ${r.status}`;}catch(e){manifestDetail=e.message;}
+      html+=add(t('PWA manifest','PWA ম্যানিফেস্ট'),manifestDetail,manifestOk);
+      let storageOk=true;try{localStorage.setItem('__ax_diag','1');localStorage.removeItem('__ax_diag');sessionStorage.setItem('__ax_diag','1');sessionStorage.removeItem('__ax_diag');}catch(e){storageOk=false;}
+      html+=add(t('Browser storage','ব্রাউজার স্টোরেজ'),storageOk?t('localStorage + sessionStorage available','localStorage + sessionStorage আছে'):t('Storage blocked','স্টোরেজ ব্লক করা'),storageOk);
+      const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+      html+=add(t('Installed mode','ইনস্টলড মোড'),standalone?t('Running as installed app','ইনস্টলড অ্যাপ হিসেবে চলছে'):t('Running in browser tab','ব্রাউজার ট্যাবে চলছে'),true,!standalone);
+      let backendOk=false,backendDetail='';
+      if(cfg.supabaseUrl&&cfg.anonKey){
+        try{const r=await fetch(String(cfg.supabaseUrl).replace(/\/$/,'')+'/rest/v1/commodities?select=code&limit=1',{headers:{apikey:cfg.anonKey},cache:'no-store'});backendOk=r.ok;backendDetail=`HTTP ${r.status}`;}catch(e){backendDetail=e.message;}
+      }else backendDetail=t('Runtime configuration missing','রানটাইম কনফিগারেশন নেই');
+      html+=add(t('Supabase public reachability','Supabase পাবলিক সংযোগ'),backendDetail,backendOk);
+      const signedIn=!!sessionStorage.getItem('agroExchangeAccessToken');
+      html+=add(t('Auth session presence','অথ সেশন উপস্থিতি'),signedIn?t('A session token exists in this browser','এই ব্রাউজারে সেশন আছে'):t('No signed-in session detected','সাইন-ইন সেশন নেই'),true,!signedIn);
+      html+=add(t('Build','বিল্ড'),`${cfg.environment||'unknown'} · v${cfg.buildVersion||'unknown'}`,!!cfg.environment,true);
+      $('#results').innerHTML=html;
+      $('#buildPill').textContent=`${cfg.environment||'staging'} v${cfg.buildVersion||'1.7'}`;
+    }
+    $('#run').addEventListener('click',run);
+    $('#lang').addEventListener('click',()=>{bn=!bn;document.documentElement.lang=bn?'bn':'en';$('#lang').textContent=bn?'English':'বাংলা';$('#title').textContent=t('Device diagnostics','ডিভাইস ডায়াগনস্টিকস');$('#intro').textContent=t('Use this page on each physical pilot device before testing a real transaction. It checks the browser, PWA shell and public Supabase reachability without exposing account tokens.','প্রতিটি বাস্তব পাইলট ডিভাইসে লেনদেন পরীক্ষা করার আগে এই পৃষ্ঠা ব্যবহার করুন। এটি অ্যাকাউন্ট টোকেন প্রকাশ না করে ব্রাউজার, PWA শেল এবং পাবলিক Supabase সংযোগ পরীক্ষা করে।');run();});
+    $('#copy').addEventListener('click',async()=>{const lines=latest.map(x=>`${x.status}\t${x.label}\t${x.detail}`);const text=`Agro-Exchange diagnostics\n${new Date().toISOString()}\n${location.href}\n`+lines.join('\n');try{await navigator.clipboard.writeText(text);$('#copy').textContent=t('Copied','কপি হয়েছে');setTimeout(()=>$('#copy').textContent=t('Copy results','ফলাফল কপি করুন'),1400);}catch{alert(text);}});
+    run();
+  })();
+  </script>
+</body>
+</html>

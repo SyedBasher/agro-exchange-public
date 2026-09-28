@@ -64,3 +64,10 @@
   .ax-language-card{padding:20px;border-radius:18px}.ax-language-card h1{font-size:28px}
   .ax-commodity-chooser{padding:14px}.ax-match-reasons span{font-size:11px}
 }
+
+.ax-farmer-verification{
+  display:grid;gap:5px;margin:0 0 18px;padding:14px 16px;border:1px solid #e2d29a;
+  border-radius:14px;background:#fff9e8;color:#5f4a12
+}
+.ax-farmer-verification strong{font-size:15px}
+.ax-farmer-verification span{font-size:14px;line-height:1.5;color:#725f2a}

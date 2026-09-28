@@ -112,6 +112,11 @@ if(profile.role==='farmer'&&!profile.verified){
     p_delivery_until:future
   },'Only verified buyer accounts can post demand');
 }else if(profile.role==='buyer'){
+  if(!profile.verified)fail('buyer profile must be verified before buyer JWT readiness can pass');
+  const myOrders=await request('/rest/v1/rpc/get_my_buy_orders',{method:'POST',body:'{}'});
+  if(!myOrders.response.ok)fail('buyer read path failed: '+errorText(myOrders));
+  pass('verified buyer can access own demand workflow');
+
   await expectRpcDenied('post_sell_offer',{
     p_commodity_code:'POTATO',
     p_grade_code:null,

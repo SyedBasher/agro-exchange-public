@@ -10,6 +10,7 @@ const admin=read('database/admin_operations.sql');
 const adminHardening=read('database/admin_operations_hardening.sql');
 const buyer=read('database/buyer_verification_gate.sql');
 const harness=read('scripts/real-jwt-negative-harness.mjs');
+const readiness=read('database/real_jwt_account_readiness.sql');
 
 must(admin.includes('create or replace function public.require_admin_profile()'),'Admin guard helper exists');
 must(admin.includes("if auth.uid() is null then raise exception 'Authentication required'"),'Admin guard requires authenticated identity');
@@ -26,6 +27,9 @@ must(harness.includes("profile.role==='farmer'"),'Real-JWT harness includes farm
 must(harness.includes("profile.role==='buyer'"),'Real-JWT harness includes buyer boundary tests');
 must(harness.includes('unexpectedly succeeded'),'Real-JWT harness fails closed on an unexpected RPC success');
 must(!harness.includes('SERVICE_ROLE'),'Real-JWT harness contains no service-role dependency');
+must(readiness.includes('auth_user_id is not null'),'Readiness gate distinguishes Auth-linked profiles from seeded profiles');
+must(readiness.includes('core_farmer_buyer_admin_ready'),'Readiness gate requires independent farmer/buyer/admin coverage');
+must(!/email|phone|token/i.test(readiness.replace(/^--.*$/gm,'')),'Readiness SQL does not expose participant contact or token fields');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 authorization contract check FAILED\n');

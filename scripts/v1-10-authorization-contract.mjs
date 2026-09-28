@@ -14,6 +14,7 @@ const readiness=read('database/real_jwt_account_readiness.sql');
 const adminPreflight=read('database/first_admin_eligibility_preflight.sql');
 const firstAdminBootstrap=read('database/pilot_admin_bootstrap_v1_9.sql');
 const buyerReadiness=read('database/buyer_promotion_readiness.sql');
+const operationsReadiness=read('database/operations_role_readiness.sql');
 
 must(admin.includes('create or replace function public.require_admin_profile()'),'Admin guard helper exists');
 must(admin.includes("if auth.uid() is null then raise exception 'Authentication required'"),'Admin guard requires authenticated identity');
@@ -48,6 +49,14 @@ must(buyerReadiness.includes("linked_sequence >= 2"),'Buyer promotion excludes t
 must(buyerReadiness.includes("coalesce(l.verified,false)=false"),'Buyer promotion candidate must still be an unverified linked farmer');
 must(buyerReadiness.includes("buyer_promotion_ready"),'Buyer promotion readiness emits a fail-closed decision');
 must(harness.includes("get_my_buy_orders"),'Buyer JWT harness includes a positive own-demand read path');
+must(operationsReadiness.includes("verified_linked_qc_operators"),'Operations readiness tracks verified linked QC operators');
+must(operationsReadiness.includes("verified_linked_field_agents"),'Operations readiness tracks verified linked field agents');
+must(operationsReadiness.includes("verified_linked_transporters"),'Operations readiness tracks verified linked transporters');
+must(operationsReadiness.includes("operations_jwt_ready"),'Operations readiness emits one fail-closed decision');
+must(harness.includes("get_qc_queue"),'QC JWT harness includes assigned-queue positive check');
+must(harness.includes("get_qc_assignment_queue"),'Field-agent JWT harness includes QC assignment queue check');
+must(harness.includes("get_available_transporters"),'Field-agent JWT harness includes transporter lookup check');
+must(harness.includes("get_my_shipments"),'Transporter JWT harness includes scoped shipment positive check');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 authorization contract check FAILED\n');

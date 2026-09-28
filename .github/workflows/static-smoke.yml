@@ -43,6 +43,7 @@ jobs:
           node --check scripts/v1-8-regression.mjs
           node --check scripts/v1-9-regression.mjs
           node --check scripts/v1-10-auth-regression.mjs
+          node --check scripts/real-jwt-negative-harness.mjs
       - name: Serve static site and probe critical paths
         shell: bash
         run: |

@@ -1,0 +1,48 @@
+name: Static deployment smoke check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate deployment files
+        run: node scripts/static-smoke.mjs
+      - name: Run v1.8 forensic regression gates
+        run: node scripts/v1-8-regression.mjs
+      - name: Run v1.9 Round-2 regression gates
+        run: node scripts/v1-9-regression.mjs
+      - name: Run v1.10 staging auth regression gates
+        run: node scripts/v1-10-auth-regression.mjs
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check app-core.js
+          find backend -maxdepth 1 -name '*.js' -print0 | xargs -0 -n1 node --check
+          node --check scripts/static-smoke.mjs
+          node --check scripts/v1-8-regression.mjs
+          node --check scripts/v1-9-regression.mjs
+          node --check scripts/v1-10-auth-regression.mjs
+      - name: Serve static site and probe critical paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 >/tmp/agro-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill $server_pid' EXIT
+          sleep 2
+          for path in / /manifest.webmanifest /sw.js /offline.html /diagnostics.html /public/ /assets/agro-exchange-icon-192.png /assets/agro-exchange-icon-512.png /backend/v1-8-hardening.js /backend/v1-8-hardening.css /backend/v1-8-final-hardening.js /backend/v1-8-final-hardening.css /backend/v1-8-copy-integrity.js /backend/v1-9-operations.js /backend/v1-9-operations.css; do
+            curl --fail --silent --show-error "http://127.0.0.1:4173${path}" >/dev/null
+          done

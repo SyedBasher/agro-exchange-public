@@ -71,3 +71,20 @@
 }
 .ax-farmer-verification strong{font-size:15px}
 .ax-farmer-verification span{font-size:14px;line-height:1.5;color:#725f2a}
+
+
+/* v1.10 pilot: end-user roles should not see the prototype operator-only operations block. */
+body.ax-end-user-role .sidebar > .sidebar-section-label,
+body.ax-end-user-role .sidebar > .secondary-nav{
+  display:none!important
+}
+body.ax-end-user-role .sidebar > .sidebar-divider{
+  display:none
+}
+
+#sellForm button.ax-verification-disabled{
+  cursor:not-allowed;opacity:.72;background:#6f7f77;border-color:#6f7f77;color:#fff
+}
+#sellForm button.ax-verification-disabled:focus-visible{
+  outline:3px solid rgba(13,106,67,.22);outline-offset:2px
+}

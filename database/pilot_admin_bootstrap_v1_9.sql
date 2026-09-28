@@ -8,10 +8,26 @@ language plpgsql
 security definer
 set search_path=public
 as $$
-declare v_profile public.profiles%rowtype;
+declare
+  v_profile public.profiles%rowtype;
+  v_original_profile_id uuid;
+  v_auth_users bigint;
+  v_linked_profiles bigint;
 begin
+  -- Serialize this one-time bootstrap decision so concurrent attempts cannot race.
+  perform pg_advisory_xact_lock(hashtext('agro_exchange_first_admin_bootstrap'));
+
   if exists(select 1 from public.profiles p where p.role='admin') then
     raise exception 'An admin already exists; use the normal admin access workflow';
+  end if;
+
+  select count(*) into v_auth_users from auth.users;
+  select count(*) into v_linked_profiles
+  from public.profiles
+  where auth_user_id is not null;
+
+  if v_auth_users < 2 or v_linked_profiles < 2 then
+    raise exception 'A separate second Auth-linked account is required before first-admin bootstrap';
   end if;
 
   select * into v_profile
@@ -21,6 +37,20 @@ begin
 
   if not found then
     raise exception 'No Agro-Exchange profile is linked to that Auth user';
+  end if;
+
+  select p.id into v_original_profile_id
+  from public.profiles p
+  where p.auth_user_id is not null
+  order by p.created_at asc,p.id asc
+  limit 1;
+
+  if v_profile.id=v_original_profile_id then
+    raise exception 'The original linked farmer cannot be used for first-admin bootstrap';
+  end if;
+
+  if v_profile.role<>'farmer' or coalesce(v_profile.verified,false) then
+    raise exception 'First-admin candidate must be a newly linked unverified farmer profile';
   end if;
 
   update public.profiles

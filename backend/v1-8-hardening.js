@@ -13,7 +13,8 @@
       sellSub:'Tell us what you have. Agro-Exchange will look for compatible verified buyers.',
       chooseProduce:'Choose produce',signInRequired:'Sign in to use the shared Agro-Exchange market.',
       verificationPendingTitle:'Farmer verification pending',
-      verificationPendingBody:'Your account is signed in. You can review the selling form now; posting supply will be enabled after pilot verification.',
+      verificationPendingBody:'Your account is signed in. You can review the selling steps now. After pilot verification, you can publish supply and look for verified buyers.',
+      verificationPublishLabel:'Verification required before publishing',
       verificationRequired:'Your farmer account must be verified before you can post supply.',
       buyerApprovalRequired:'An approved buyer account is required to post demand.',
       wrongRole:'This action is not available for your account role.',serviceUnavailable:'The live transaction service is not ready. Please refresh and try again.',
@@ -32,7 +33,8 @@
       sellSub:'আপনার পণ্যের তথ্য দিন। Agro-Exchange উপযুক্ত যাচাইকৃত ক্রেতা খুঁজবে।',
       chooseProduce:'পণ্য বেছে নিন',signInRequired:'শেয়ার্ড Agro-Exchange বাজার ব্যবহার করতে সাইন ইন করুন।',
       verificationPendingTitle:'কৃষক যাচাই অপেক্ষমাণ',
-      verificationPendingBody:'আপনি সাইন ইন করেছেন। এখন বিক্রির ফর্মটি দেখতে পারবেন; পাইলট যাচাই সম্পন্ন হলে সরবরাহ পোস্ট করা যাবে।',
+      verificationPendingBody:'আপনি সাইন ইন করেছেন। এখন বিক্রির ধাপগুলো দেখতে পারবেন। পাইলট যাচাই সম্পন্ন হলে সরবরাহ প্রকাশ করে যাচাইকৃত ক্রেতা খুঁজতে পারবেন।',
+      verificationPublishLabel:'প্রকাশের আগে যাচাই প্রয়োজন',
       verificationRequired:'সরবরাহ পোস্ট করার আগে আপনার কৃষক অ্যাকাউন্ট যাচাই হতে হবে।',
       buyerApprovalRequired:'চাহিদা পোস্ট করতে অনুমোদিত ক্রেতা অ্যাকাউন্ট প্রয়োজন।',
       wrongRole:'আপনার অ্যাকাউন্টের ভূমিকা দিয়ে এই কাজটি করা যাবে না।',serviceUnavailable:'লাইভ লেনদেন সেবা প্রস্তুত নয়। পেজ রিফ্রেশ করে আবার চেষ্টা করুন।',
@@ -184,7 +186,18 @@
     let notice=document.getElementById('axFarmerVerificationNotice');
     const p=profile();
     const shouldShow=Boolean(signedIn()&&p?.role==='farmer'&&!p.verified);
-    if(!shouldShow){notice?.remove();return;}
+    const submit=form.querySelector('button[type="submit"]');
+    if(!shouldShow){
+      notice?.remove();
+      if(submit?.dataset.axOriginalLabel){
+        submit.disabled=false;
+        submit.removeAttribute('aria-disabled');
+        submit.classList.remove('ax-verification-disabled');
+        submit.textContent=submit.dataset.axOriginalLabel;
+        delete submit.dataset.axOriginalLabel;
+      }
+      return;
+    }
     if(!notice){
       notice=document.createElement('div');
       notice.id='axFarmerVerificationNotice';
@@ -193,6 +206,28 @@
       form.insertBefore(notice,form.firstChild);
     }
     notice.innerHTML=`<strong>${t('verificationPendingTitle')}</strong><span>${t('verificationPendingBody')}</span>`;
+
+    if(submit){
+      if(shouldShow){
+        if(!submit.dataset.axOriginalLabel)submit.dataset.axOriginalLabel=submit.textContent.trim();
+        submit.disabled=true;
+        submit.setAttribute('aria-disabled','true');
+        submit.classList.add('ax-verification-disabled');
+        submit.textContent=t('verificationPublishLabel');
+      }else if(submit.dataset.axOriginalLabel){
+        submit.disabled=false;
+        submit.removeAttribute('aria-disabled');
+        submit.classList.remove('ax-verification-disabled');
+        submit.textContent=submit.dataset.axOriginalLabel;
+        delete submit.dataset.axOriginalLabel;
+      }
+    }
+  }
+
+  function refreshRoleNavigation(){
+    const p=profile();
+    const endUser=Boolean(signedIn()&&(p?.role==='farmer'||p?.role==='buyer'));
+    document.body.classList.toggle('ax-end-user-role',endUser);
   }
 
   function replaceDeadDemandButton(){
@@ -297,8 +332,8 @@
   }
 
   function refreshLanguageUi(){
-    refreshSelectOptions();refreshAria();refreshFarmerChooser();refreshFarmerVerificationNotice();labelSimulatedWidgets();suppressLegacyTransactionalDemo();addMatchReasons();observeAuthError();
-    const footer=document.querySelector('.sidebar-footer span');if(footer)footer.textContent='v1.8 controlled staging';
+    refreshSelectOptions();refreshAria();refreshFarmerChooser();refreshFarmerVerificationNotice();refreshRoleNavigation();labelSimulatedWidgets();suppressLegacyTransactionalDemo();addMatchReasons();observeAuthError();
+    const footer=document.querySelector('.sidebar-footer span');if(footer)footer.textContent='v1.10 controlled staging';
   }
 
   function reportModuleFailure(src,error){

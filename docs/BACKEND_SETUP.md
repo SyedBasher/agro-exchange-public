@@ -1,55 +1,83 @@
-# Backend setup sequence
+# Backend setup sequence — v1.10 controlled pilot
 
-The repository is now ready to move from hard-coded prototype data to persistent records.
+PostgreSQL/Supabase is the Agro-Exchange system of record. The browser uses only the Supabase project URL, publishable key and the signed-in user's JWT. Privileged credentials never belong in browser code or GitHub.
 
-## Recommended backend
+## Authoritative database replay
 
-PostgreSQL is the system of record. Supabase is a practical first hosting layer because it combines PostgreSQL, authentication, row-level security, storage and APIs without changing the underlying database model.
+For a fresh controlled staging database, follow **`docs/V1_10_DATABASE_REPLAY_ORDER.md`**.
 
-## Deployment sequence
+Do not reconstruct the database by running only `schema.sql`, `views.sql` and `seed.sql`. Later files intentionally replace and harden earlier RPC definitions. The v1.10 override layer must be applied after the older workflow definitions.
 
-1. Create/connect a Supabase project.
-2. Run `database/schema.sql`.
-3. Run `database/views.sql`.
-4. Run `database/seed.sql` for the simulated pilot environment only.
-5. Configure authentication and role mapping between auth users and `profiles.auth_user_id`.
-6. Add and test row-level security before any real user data is loaded.
-7. Replace hard-coded JavaScript arrays in the trading application with queries to the backend.
-8. Make `Post supply` persist to `sell_offers`.
-9. Make buyer-demand screens read from `open_demand_view`.
-10. Make the matching screen read from deterministic matching output and store accepted matches.
+For an existing Supabase project, use reviewed migrations and verify the live definitions after each security-sensitive change. Do not blindly replay the fresh-database sequence against populated staging.
 
-## Security rules
+## Authentication and roles
 
-- Browser code may use only the public/anonymous project key.
-- Service-role keys must never be committed or exposed to browsers.
-- Real phone numbers, NIDs, bank details and payment credentials must not be put into seed data.
-- Authentication alone is not authorization. Row-level security must restrict users to the records they are entitled to change.
-- Institutional analytics should be based on de-identified or aggregated data where appropriate.
+Supabase Auth creates genuine identities. The profile trigger provisions a new Auth user as an **unverified farmer**.
 
-## Provenance rules
+Pilot roles are:
 
-The application must distinguish between:
+- farmer
+- buyer
+- qc_operator
+- field_agent
+- transporter
+- admin
 
-- verified Agro-Exchange transactions,
-- open seller offers,
-- open buyer orders,
-- official external observations,
-- partner observations,
-- manually verified observations,
-- simulated or modelled values.
+Buyer and operational roles are approval-based. Buyers additionally require membership in a verified buyer organization.
 
-A number should not appear as a generic 'market price' unless its source class and time are known.
+Never fabricate pilot identities by inserting directly into `auth.users`. Never commit access/refresh tokens, magic links, passwords or participant contact details.
 
-## First live backend milestone
+## Authoritative transaction path
 
-The first end-to-end milestone should be deliberately narrow:
+New supply, demand and lifecycle mutations are RPC-owned. Browser code must not directly mutate protected lifecycle tables.
 
-1. A test farmer signs in.
-2. The farmer submits a potato offer in Bangla on a phone.
-3. The record is saved to `sell_offers`.
-4. A test buyer signs in and submits a compatible order.
-5. The system returns the pair as a feasible match.
-6. Both records remain auditable in PostgreSQL.
+The controlled trade chain is:
 
-No payment integration is required for this milestone.
+```text
+verified supply + verified demand
+ -> feasible match
+ -> two-party trade confirmation
+ -> confirmed
+ -> selective QC / QC waiver
+ -> ready_for_dispatch
+ -> shipment assignment + transporter acceptance
+ -> in_transit
+ -> delivered
+ -> buyer receipt
+ -> payment-status/reference recording
+ -> seller payment confirmation
+ -> settled
+```
+
+Disputes suspend the normal path and require bilateral commercial resolution. Admin may coordinate but cannot substitute for buyer/seller commercial consent.
+
+## v1.10 integrity layer
+
+The v1.10 database adds defense-in-depth for:
+
+- first-admin bootstrap eligibility;
+- buyer and operational-role JWT readiness;
+- buyer-side lifecycle authorization;
+- historical dispute-party continuity;
+- cancellation/inventory restoration;
+- quantity reconciliation;
+- monetary reconciliation;
+- a central trade-state transition guard.
+
+Run `database/trade_state_machine_health.sql` during pilot diagnostics. Any non-zero anomaly count requires investigation before continuing transactions.
+
+## Synthetic data
+
+`database/seed.sql` is simulated development data only. It is not an Auth-user provisioning mechanism and must never be used to claim a real multi-user test passed.
+
+## Pilot release gate
+
+Repository/CI correctness is necessary but not sufficient. Before a real-user pilot:
+
+1. exact branch/build must pass public-release and static smoke CI;
+2. live Supabase must match the v1.10 hardened function/trigger definitions;
+3. independent real Auth identities must exist for farmer, admin and buyer, followed by QC/field-agent/transporter roles;
+4. real-JWT positive and negative role tests must pass;
+5. a full multi-account transaction must complete from supply/demand through settlement/dispute paths;
+6. state-machine health audit must remain zero-anomaly;
+7. no pilot user secrets or operational data may be committed to the public repository.

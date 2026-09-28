@@ -10,6 +10,7 @@ const auth=read('backend/auth.js');
 const css=read('backend/auth.css');
 const runtime=read('backend/runtime-config.js');
 const sw=read('sw.js');
+const jwtHarness=read('scripts/real-jwt-negative-harness.mjs');
 
 must(auth.includes("sendEmailOtp"),'Email passwordless sign-in request exists');
 must(auth.includes("redirect_to=")&&auth.includes("location.origin+location.pathname"),'Magic-link email returns to the active staging origin');
@@ -23,15 +24,27 @@ must(auth.includes("SMS sign-in is temporarily unavailable. Use Email for pilot 
 must(auth.includes("authUsePhone")&&auth.includes("authUseEmail"),'Bilingual sign-in method switch exists');
 must(auth.includes("authEmailSent")&&auth.includes("No code is required with the current staging email template."),'Email staging flow explains magic-link sign-in instead of falsely requiring a code');
 must(auth.includes("agroV18RoleHomeApplied"),'Fresh auth sessions reset the role-home routing latch');
+must(auth.includes("setSession(data,{freshAuth=true})")||auth.includes("setSession(data,{freshAuth:true})"),'Direct OTP verification marks a genuinely fresh auth session');
+must(auth.includes("},{freshAuth:true});"),'Magic-link redirect marks a genuinely fresh auth session');
+must(auth.includes("setSession(data,{freshAuth:false})"),'Silent token refresh preserves the role-home routing latch');
+must(auth.includes("if(freshAuth)sessionStorage.removeItem('agroV18RoleHomeApplied')"),'Role-home latch is reset only for fresh authentication');
 must(auth.includes("agro-profile-ready"),'Profile readiness is signaled after authenticated profile load');
 const hardening=read('backend/v1-8-hardening.js');
 must(hardening.includes("window.addEventListener('agro-profile-ready'"),'Role-home routing waits for the authenticated profile');
 must(hardening.includes("p.role==='farmer'")&&hardening.includes("window.showView('sell')"),'Farmer role-home routes to the selling workflow');
 must(hardening.includes('verificationPendingTitle')&&hardening.includes('verificationPendingBody'),'Unverified farmers receive bilingual verification-pending guidance');
+must(hardening.includes('verificationPublishLabel')&&hardening.includes('ax-verification-disabled'),'Unverified farmer publish action is visibly gated before form submission');
+must(hardening.includes("p?.role==='farmer'||p?.role==='buyer'")&&hardening.includes('ax-end-user-role'),'Farmer and buyer navigation suppresses the prototype operator-only block');
+must(hardening.includes("p.role==='buyer'")&&hardening.includes("window.showView('demand')"),'Buyer role-home routes to the procurement workflow');
 must(!auth.includes("Configure the Twilio provider in Supabase"),'Provider internals are not exposed to end users');
 must(css.includes('.auth-methods')&&css.includes('88dvh'),'Dual auth UI has mobile-safe styling');
 must(/buildVersion:\s*['\"]1\.10['\"]/.test(runtime),'Runtime identifies v1.10');
 must(sw.includes("CACHE_NAME='agro-exchange-shell-v1.10'"),'PWA cache identifies v1.10');
+must(jwtHarness.includes('AGRO_TEST_ACCESS_TOKEN'),'Real-JWT harness takes its access token only at runtime');
+must(jwtHarness.includes("Farmer verification is required before posting supply"),'Harness tests unverified-farmer supply denial');
+must(jwtHarness.includes("Only verified buyer accounts can post demand"),'Harness tests farmer-to-buyer role separation');
+must(jwtHarness.includes("Only farmer accounts can post supply in this workflow"),'Harness tests buyer-to-farmer role separation');
+must(!jwtHarness.includes('service_role'),'Real-JWT harness does not use service-role credentials');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 auth regression check FAILED\n');

@@ -31,6 +31,10 @@ jobs:
         run: node scripts/v1-9-regression.mjs
       - name: Run v1.10 staging auth regression gates
         run: node scripts/v1-10-auth-regression.mjs
+      - name: Run v1.10 authorization contract gates
+        run: node scripts/v1-10-authorization-contract.mjs
+      - name: Run v1.10 release-candidate repository gates
+        run: node scripts/v1-10-release-candidate.mjs
       - name: Check JavaScript syntax
         shell: bash
         run: |
@@ -43,6 +47,9 @@ jobs:
           node --check scripts/v1-8-regression.mjs
           node --check scripts/v1-9-regression.mjs
           node --check scripts/v1-10-auth-regression.mjs
+          node --check scripts/real-jwt-negative-harness.mjs
+          node --check scripts/v1-10-authorization-contract.mjs
+          node --check scripts/v1-10-release-candidate.mjs
       - name: Serve static site and probe critical paths
         shell: bash
         run: |

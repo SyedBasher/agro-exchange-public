@@ -13,6 +13,7 @@ const harness=read('scripts/real-jwt-negative-harness.mjs');
 const readiness=read('database/real_jwt_account_readiness.sql');
 const adminPreflight=read('database/first_admin_eligibility_preflight.sql');
 const firstAdminBootstrap=read('database/pilot_admin_bootstrap_v1_9.sql');
+const buyerReadiness=read('database/buyer_promotion_readiness.sql');
 
 must(admin.includes('create or replace function public.require_admin_profile()'),'Admin guard helper exists');
 must(admin.includes("if auth.uid() is null then raise exception 'Authentication required'"),'Admin guard requires authenticated identity');
@@ -41,6 +42,11 @@ must(firstAdminBootstrap.includes("v_profile.id=v_original_profile_id"),'Bootstr
 must(firstAdminBootstrap.includes("v_profile.role<>'farmer' or coalesce(v_profile.verified,false)"),'Bootstrap accepts only a newly linked unverified farmer candidate');
 must(firstAdminBootstrap.includes("pg_advisory_xact_lock"),'Bootstrap serializes the one-time admin decision');
 must(firstAdminBootstrap.includes("from public,anon,authenticated,service_role"),'Bootstrap remains unavailable to browser and service roles');
+must(buyerReadiness.includes("linked_admins >= 1"),'Buyer promotion requires an independent linked admin');
+must(buyerReadiness.includes("verified_orgs >= 1"),'Buyer promotion requires a verified buyer organization');
+must(buyerReadiness.includes("coalesce(l.verified,false)=false"),'Buyer promotion candidate must still be an unverified linked farmer');
+must(buyerReadiness.includes("buyer_promotion_ready"),'Buyer promotion readiness emits a fail-closed decision');
+must(harness.includes("get_my_buy_orders"),'Buyer JWT harness includes a positive own-demand read path');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 authorization contract check FAILED\n');

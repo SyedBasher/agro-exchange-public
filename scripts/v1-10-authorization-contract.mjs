@@ -44,6 +44,7 @@ must(firstAdminBootstrap.includes("pg_advisory_xact_lock"),'Bootstrap serializes
 must(firstAdminBootstrap.includes("from public,anon,authenticated,service_role"),'Bootstrap remains unavailable to browser and service roles');
 must(buyerReadiness.includes("linked_admins >= 1"),'Buyer promotion requires an independent linked admin');
 must(buyerReadiness.includes("verified_orgs >= 1"),'Buyer promotion requires a verified buyer organization');
+must(buyerReadiness.includes("linked_sequence >= 2"),'Buyer promotion excludes the original linked farmer');
 must(buyerReadiness.includes("coalesce(l.verified,false)=false"),'Buyer promotion candidate must still be an unverified linked farmer');
 must(buyerReadiness.includes("buyer_promotion_ready"),'Buyer promotion readiness emits a fail-closed decision');
 must(harness.includes("get_my_buy_orders"),'Buyer JWT harness includes a positive own-demand read path');

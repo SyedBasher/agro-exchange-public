@@ -1,0 +1,66 @@
+/* Agro-Exchange v1.8 — farmer-first, bilingual and trust hardening */
+
+.ax-language-chooser{
+  position:fixed;inset:0;z-index:100000;display:grid;place-items:center;
+  padding:20px;background:rgba(6,36,26,.92);backdrop-filter:blur(6px)
+}
+.ax-language-card{
+  width:min(520px,100%);background:#fff;border-radius:24px;padding:28px;
+  box-shadow:0 24px 80px rgba(0,0,0,.28);color:#10261e
+}
+.ax-language-card h1{font-size:clamp(28px,6vw,42px);line-height:1.12;margin:20px 0 10px}
+.ax-language-card h1 span{font-weight:400;color:#819087}.ax-language-card p{font-size:17px;color:#64746e;line-height:1.55}
+.ax-language-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+.ax-language-actions button{
+  min-height:64px;border:1px solid #cfd9d4;border-radius:16px;background:#f8fbf9;
+  font:700 20px/1.2 inherit;color:#14372a;cursor:pointer
+}
+.ax-language-actions button:first-child{background:#0d6a43;color:#fff;border-color:#0d6a43}
+
+.ax-commodity-chooser{margin:0 0 24px;padding:18px;border:1px solid #d8e2dd;border-radius:16px;background:#f8fbf9}
+.ax-commodity-label{display:block;margin-bottom:12px;font-size:14px;letter-spacing:.02em;color:#365448}
+.ax-commodity-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ax-commodity-buttons button{
+  min-height:58px;border:1px solid #c8d6cf;border-radius:14px;background:#fff;color:#16392c;
+  font:750 18px/1.2 inherit;cursor:pointer
+}
+.ax-commodity-buttons button.selected,.ax-commodity-buttons button:focus-visible{background:#0d6a43;color:#fff;border-color:#0d6a43}
+
+.ax-sim-chip{
+  display:inline-flex;align-items:center;width:max-content;margin:0 0 8px;padding:4px 8px;
+  border-radius:999px;background:#fff4d7;color:#765813;font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase
+}
+.ax-live-only-note{padding:22px;color:#52665e;line-height:1.55;border-style:dashed}
+.ax-match-reasons{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.ax-match-reasons span{padding:5px 8px;border-radius:999px;background:#edf7f1;color:#14633e;font-size:12px;font-weight:700}
+.persistent-score,.buyer-score{display:none!important}
+
+.ax-module-failure{
+  position:sticky;top:0;z-index:99999;padding:12px 18px;background:#8b1e1e;color:#fff;
+  text-align:center;font-weight:750;box-shadow:0 2px 12px rgba(0,0,0,.15)
+}
+
+/* All important touch controls meet the minimum mobile target. */
+.icon-button,.icon-button.mini,.language-switch,.side-link,.auth-close,.trade-close,.qc-close,.log-close,.set-close,.dsp-close,.admin-close{
+  min-width:44px;min-height:44px
+}
+
+/* Transactional sheets follow the visual viewport on modern mobile browsers. */
+.auth-sheet,.trade-sheet,.qc-sheet,.log-sheet,.set-sheet,.dsp-sheet,.admin-sheet{
+  max-height:100dvh
+}
+
+@media(max-width:620px){
+  #sell .page-heading h1{font-size:clamp(34px,11vw,48px);line-height:1.05}
+  #sell .page-heading p{font-size:17px;line-height:1.55}
+  .ax-commodity-buttons{grid-template-columns:1fr}
+  .ax-commodity-buttons button{min-height:60px;text-align:left;padding:0 18px}
+  .ax-language-actions{grid-template-columns:1fr}.ax-language-actions button{min-height:66px}
+  .persistent-match-row,.buyer-match-row{position:relative}
+  .ax-match-reasons{margin-top:12px}
+}
+
+@media(max-width:320px){
+  .ax-language-card{padding:20px;border-radius:18px}.ax-language-card h1{font-size:28px}
+  .ax-commodity-chooser{padding:14px}.ax-match-reasons span{font-size:11px}
+}

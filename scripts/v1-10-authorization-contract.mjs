@@ -18,6 +18,7 @@ const operationsReadiness=read('database/operations_role_readiness.sql');
 const lifecycleHardening=read('database/lifecycle_authorization_hardening_v1_10.sql');
 const disputeContinuity=read('database/dispute_party_continuity_v1_10.sql');
 const cancellationIntegrity=read('database/cancellation_inventory_integrity_v1_10.sql');
+const quantityIntegrity=read('database/quantity_reconciliation_integrity_v1_10.sql');
 
 must(admin.includes('create or replace function public.require_admin_profile()'),'Admin guard helper exists');
 must(admin.includes("if auth.uid() is null then raise exception 'Authentication required'"),'Admin guard requires authenticated identity');
@@ -78,6 +79,11 @@ must(cancellationIntegrity.includes("status='cancelled'"),'Assigned or accepted 
 must(cancellationIntegrity.includes("inventory_restored_after_cancellation"),'Inventory restoration remains idempotent');
 must(cancellationIntegrity.includes("least("),'Inventory restoration remains quantity-capped');
 must(cancellationIntegrity.includes("from public,anon,authenticated,service_role"),'Inventory restoration helper is internal only');
+must(quantityIntegrity.includes("Adjusted quantity cannot exceed the originally reserved trade quantity"),'Adjusted quantity cannot exceed reserved trade quantity');
+must(quantityIntegrity.includes("Payment trade does not match its payment obligation"),'Payment row must match its obligation trade');
+must(quantityIntegrity.includes("Delivery receipt trade does not match its shipment"),'Delivery receipt must match shipment trade');
+must(quantityIntegrity.includes("Delivery receipt buyer organization does not match the trade"),'Delivery receipt must match trade buyer organization');
+must(quantityIntegrity.match(/from public,anon,authenticated,service_role/g)?.length>=3,'Quantity integrity trigger helpers remain internal only');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 authorization contract check FAILED\n');

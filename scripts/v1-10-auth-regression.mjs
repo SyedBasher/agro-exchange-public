@@ -25,7 +25,7 @@ must(auth.includes("authEmailSent")&&auth.includes("No code is required with the
 must(auth.includes("agroV18RoleHomeApplied"),'Fresh auth sessions reset the role-home routing latch');
 must(!auth.includes("Configure the Twilio provider in Supabase"),'Provider internals are not exposed to end users');
 must(css.includes('.auth-methods')&&css.includes('88dvh'),'Dual auth UI has mobile-safe styling');
-must(runtime.includes("buildVersion: '1.10'"),'Runtime identifies v1.10');
+must(/buildVersion:\s*['\"]1\.10['\"]/.test(runtime),'Runtime identifies v1.10');
 must(sw.includes("CACHE_NAME='agro-exchange-shell-v1.10'"),'PWA cache identifies v1.10');
 
 if(errors.length){

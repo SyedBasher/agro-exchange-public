@@ -64,6 +64,7 @@ const finalCss=read('backend/v1-8-final-hardening.css');
 if(!finalCss.includes('min-width:44px')||!finalCss.includes('100dvh'))errors.push('Final hardening CSS must retain touch-target and dynamic-viewport safeguards');
 
 const netlify=read('netlify.toml');
+if(!netlify.includes('node scripts/generate-runtime-config.mjs'))errors.push('Netlify build must generate deployment runtime config');
 for(const marker of ['X-Robots-Tag','noindex','Service-Worker-Allowed','Permissions-Policy']){
   if(!netlify.includes(marker))errors.push(`Netlify staging header missing ${marker}`);
 }

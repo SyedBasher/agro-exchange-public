@@ -9,7 +9,8 @@ with linked as (
     p.auth_user_id,
     p.role::text as role,
     p.verified,
-    p.created_at
+    p.created_at,
+    row_number() over (order by p.created_at asc,p.id asc) as linked_sequence
   from public.profiles p
   where p.auth_user_id is not null
 ),
@@ -25,6 +26,7 @@ candidates as (
   select l.profile_id,l.role,l.verified
   from linked l
   where l.role='farmer'
+    and l.linked_sequence >= 2
     and coalesce(l.verified,false)=false
     and not exists (
       select 1 from linked a

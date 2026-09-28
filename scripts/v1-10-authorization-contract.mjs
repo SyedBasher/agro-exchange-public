@@ -20,6 +20,9 @@ const disputeContinuity=read('database/dispute_party_continuity_v1_10.sql');
 const cancellationIntegrity=read('database/cancellation_inventory_integrity_v1_10.sql');
 const quantityIntegrity=read('database/quantity_reconciliation_integrity_v1_10.sql');
 const monetaryIntegrity=read('database/monetary_reconciliation_integrity_v1_10.sql');
+const tradeStateMachine=read('database/trade_state_machine_integrity_v1_10.sql');
+const disputeEntryContinuity=read('database/dispute_entry_continuity_v1_10.sql');
+const tradeStateHealth=read('database/trade_state_machine_health.sql');
 
 must(admin.includes('create or replace function public.require_admin_profile()'),'Admin guard helper exists');
 must(admin.includes("if auth.uid() is null then raise exception 'Authentication required'"),'Admin guard requires authenticated identity');
@@ -92,6 +95,17 @@ must(monetaryIntegrity.includes("Confirmed payment total would exceed the amount
 must(monetaryIntegrity.includes("if v_total=v_obligation.amount_due_bdt then"),'Settlement requires exact 2-decimal equality');
 must(monetaryIntegrity.includes("payments_amount_bdt_positive_v1_10"),'Recorded payments must be strictly positive');
 must(monetaryIntegrity.includes("payment_obligations_unit_price_positive_v1_10"),'Active obligation unit price remains strictly positive');
+must(tradeStateMachine.includes("Terminal trade state cannot transition"),'Settled and cancelled trade states are terminal');
+must(tradeStateMachine.includes("Illegal trade state transition"),'Central trade transition matrix fails closed');
+must(tradeStateMachine.includes("Trade cannot enter transit without an in-transit shipment"),'In-transit state requires physical shipment evidence');
+must(tradeStateMachine.includes("Trade cannot be delivered without a delivered shipment"),'Delivered state requires delivered shipment evidence');
+must(tradeStateMachine.includes("Trade cannot settle unless confirmed payments equal amount due"),'Settled state requires exact monetary reconciliation');
+must(tradeStateMachine.includes("Trade cannot be cancelled after dispatch or delivery"),'Trade cancellation is blocked after physical dispatch or delivery');
+must(tradeStateMachine.includes("from public,anon,authenticated,service_role"),'Trade state-machine trigger helper is internal only');
+must(disputeEntryContinuity.match(/public\.is_trade_buyer_party/g)?.length>=3,'Dispute entry/read paths preserve historical buyer-party continuity');
+must(tradeStateHealth.includes("settled_payment_total_mismatch"),'State health audit checks settlement arithmetic');
+must(tradeStateHealth.includes("terminal_trade_with_active_dispute"),'State health audit checks terminal-state dispute contradictions');
+must(tradeStateHealth.includes("confirmed_no_qc_should_have_routed"),'State health audit detects stuck no-QC confirmations');
 
 if(errors.length){
   console.error('\nAgro-Exchange v1.10 authorization contract check FAILED\n');
